@@ -1,0 +1,234 @@
+@{
+    ViewData["Title"] = "Panel de Administrador";
+    Layout = "_LayoutAdmin";
+}
+
+<style>
+    :root {
+        --primary-color: #f1149b;
+        --primary-soft: rgba(241, 20, 155, 0.08);
+        --primary-hover: rgba(241, 20, 155, 0.15);
+        --text-dark: #344767;
+        --text-muted: #8392ab;
+    }
+
+    .dashboard-header {
+        background: white;
+        border-radius: 16px;
+        padding: 2rem;
+        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+        margin-bottom: 2.5rem;
+        border-left: 5px solid var(--primary-color);
+    }
+
+    .dashboard-card {
+        background: white;
+        border: 1px solid rgba(0,0,0,0.05);
+        border-radius: 16px;
+        padding: 2rem 1.5rem;
+        text-align: center;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        cursor: pointer;
+        position: relative;
+        overflow: hidden;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .icon-box {
+        width: 80px;
+        height: 80px;
+        background-color: var(--primary-soft);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 1.5rem;
+        transition: transform 0.3s ease;
+        color: var(--primary-color);
+    }
+
+        .icon-box i {
+            font-size: 2.5rem;
+            transition: color 0.3s ease;
+        }
+
+    .card-title {
+        color: var(--text-dark);
+        font-weight: 700;
+        font-size: 1.25rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .card-desc {
+        color: var(--text-muted);
+        font-size: 0.9rem;
+        line-height: 1.5;
+        margin-bottom: 0;
+    }
+
+    .card-link::after {
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        z-index: 1;
+        content: "";
+    }
+
+    .dashboard-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 15px 30px rgba(241, 20, 155, 0.15);
+        border-color: rgba(241, 20, 155, 0.3);
+    }
+
+        .dashboard-card:hover .icon-box {
+            transform: scale(1.1) rotate(-5deg);
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+            .dashboard-card:hover .icon-box i {
+                color: white;
+            }
+
+    .dashboard-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 4px;
+        background: var(--primary-color);
+        transform: scaleX(0);
+        transform-origin: left;
+        transition: transform 0.3s ease;
+    }
+
+    .dashboard-card:hover::before {
+        transform: scaleX(1);
+    }
+
+</style>
+
+<div class="container py-4">
+
+    <div class="dashboard-header d-flex align-items-center justify-content-between flex-wrap gap-3">
+        <div>
+            <h2 class="fw-bold mb-1 text-dark">Panel de Control</h2>
+            <p class="text-muted mb-0">Bienvenido de nuevo. Aquí tienes un resumen general de tu tienda.</p>
+        </div>
+        <div class="d-none d-md-block">
+            <span class="badge rounded-pill bg-light text-dark border px-3 py-2">
+                <i class="bi bi-calendar-event me-1"></i> @DateTime.Now.ToString("dd MMMM, yyyy")
+            </span>
+        </div>
+    </div>
+
+    <div class="row g-4">
+
+        <div class="col-sm-6 col-lg-4 col-xl-3">
+            <div class="dashboard-card">
+                <div class="icon-box">
+                    <i class="bi bi-box-seam"></i>
+                </div>
+                <h5 class="card-title">Productos</h5>
+                <p class="card-desc">Gestiona inventario, precios y detalles del catálogo.</p>
+                <a asp-controller="Producto" asp-action="Index" class="card-link"></a>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-lg-4 col-xl-3">
+            <div class="dashboard-card">
+                <div class="icon-box">
+                    <i class="bi bi-tags"></i>
+                </div>
+                <h5 class="card-title">Categorías</h5>
+                <p class="card-desc">Organiza tu ropa por colecciones o tipos.</p>
+                <a asp-controller="Categoria" asp-action="Index" class="card-link"></a>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-lg-4 col-xl-3">
+            <div class="dashboard-card">
+                <div class="icon-box">
+                    <i class="bi bi-bag-check"></i>
+                </div>
+                <h5 class="card-title">Ventas</h5>
+                <p class="card-desc">Historial de transacciones y estados de pago.</p>
+                <a asp-controller="Venta" asp-action="Index" class="card-link"></a>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-lg-4 col-xl-3">
+            <div class="dashboard-card">
+                <div class="icon-box">
+                    <i class="bi bi-truck"></i>
+                </div>
+                <h5 class="card-title">Envíos</h5>
+                <p class="card-desc">Seguimiento logístico y entregas pendientes.</p>
+                <a asp-controller="Envio" asp-action="Index" class="card-link"></a>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-lg-4 col-xl-3">
+            <div class="dashboard-card">
+                <div class="icon-box">
+                    <i class="bi bi-people"></i>
+                </div>
+                <h5 class="card-title">Clientes</h5>
+                <p class="card-desc">Base de datos de usuarios y fidelización.</p>
+                <a asp-controller="Cliente" asp-action="Index" class="card-link"></a>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-lg-4 col-xl-3">
+            <div class="dashboard-card">
+                <div class="icon-box">
+                    <i class="bi bi-ticket-perforated"></i>
+                </div>
+                <h5 class="card-title">Cupones</h5>
+                <p class="card-desc">Crear promociones y códigos de descuento.</p>
+                <a asp-controller="CuponDescuento" asp-action="Index" class="card-link"></a>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-lg-4 col-xl-3">
+            <div class="dashboard-card">
+                <div class="icon-box">
+                    <i class="bi bi-buildings"></i>
+                </div>
+                <h5 class="card-title">Proveedores</h5>
+                <p class="card-desc">Gestión de socios comerciales y marcas.</p>
+                <a asp-controller="Proveedor" asp-action="Index" class="card-link"></a>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-lg-4 col-xl-3">
+            <div class="dashboard-card">
+                <div class="icon-box" style="background-color: rgba(255, 193, 7, 0.15); color: #ffc107;">
+                    <i class="bi bi-exclamation-triangle" style="color: #ffc107;"></i>
+                </div>
+                <h5 class="card-title">Alertas Stock</h5>
+                <p class="card-desc">Productos con bajo inventario que requieren atención.</p>
+                <a asp-controller="AlertaStock" asp-action="Index" class="card-link"></a>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-lg-4 col-xl-3">
+            <div class="dashboard-card">
+                <div class="icon-box">
+                    <i class="bi bi-person-gear"></i>
+                </div>
+                <h5 class="card-title">Admin</h5>
+                <p class="card-desc">Gestión de accesos y roles del sistema.</p>
+                <a asp-controller="Administrador" asp-action="Index" class="card-link"></a>
+            </div>
+        </div>
+
+    </div>
+</div>

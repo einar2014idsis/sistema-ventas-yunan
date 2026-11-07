@@ -1,0 +1,324 @@
+@model Proyecto_DAS.ViewModels.ClientePanel.DetalleCompraViewModel
+@{
+    ViewData["Title"] = "Detalle de Compra";
+    Layout = "_LayoutCliente";
+}
+
+<style>
+    .detail-card {
+        background: white;
+        border-radius: 16px;
+        border: none;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+        margin-bottom: 1.5rem;
+        overflow: hidden;
+    }
+
+    .detail-header {
+        background-color: white;
+        border-bottom: 1px solid #f0f0f0;
+        padding: 1.5rem;
+    }
+
+    .detail-title {
+        font-family: 'Playfair Display', serif;
+        font-weight: 700;
+        margin: 0;
+        color: #333;
+    }
+
+    .product-item {
+        padding: 1.5rem;
+        border-bottom: 1px solid #f9f9f9;
+        transition: background-color 0.2s;
+    }
+
+        .product-item:last-child {
+            border-bottom: none;
+        }
+
+        .product-item:hover {
+            background-color: #fcfcfc;
+        }
+
+    .product-thumb {
+        width: 70px;
+        height: 70px;
+        border-radius: 10px;
+        object-fit: cover;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    }
+
+    .summary-section {
+        background-color: #fafafa;
+        padding: 1.5rem;
+        border-top: 1px solid #eee;
+    }
+
+    .status-badge {
+        padding: 0.5rem 1rem;
+        border-radius: 50px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+    }
+
+    .bg-status-success {
+        background-color: #d1e7dd;
+        color: #0f5132;
+    }
+
+    .bg-status-warning {
+        background-color: #fff3cd;
+        color: #664d03;
+    }
+
+    .bg-status-danger {
+        background-color: #f8d7da;
+        color: #842029;
+    }
+
+    .bg-status-info {
+        background-color: #cff4fc;
+        color: #055160;
+    }
+
+    .btn-action-primary {
+        background-color: #f1149b;
+        color: white;
+        border-radius: 12px;
+        padding: 10px 20px;
+        font-weight: 600;
+        border: none;
+        transition: all 0.3s;
+    }
+
+        .btn-action-primary:hover {
+            background-color: #d60e89;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(241, 20, 155, 0.2);
+        }
+
+    .btn-action-outline {
+        border: 2px solid #eee;
+        color: #555;
+        border-radius: 12px;
+        padding: 10px 20px;
+        font-weight: 600;
+        background: white;
+        transition: all 0.3s;
+    }
+
+        .btn-action-outline:hover {
+            border-color: #333;
+            color: #333;
+        }
+</style>
+
+<div class="container py-5">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <a asp-controller="ClientePanel" asp-action="MisCompras" class="text-decoration-none text-muted mb-2 d-inline-block small">
+                <i class="bi bi-arrow-left me-1"></i> Volver a Mis Compras
+            </a>
+            <h2 class="fw-bold mb-0" style="font-family: 'Playfair Display', serif;">Orden #@Model.IdVenta</h2>
+        </div>
+        <div class="d-none d-md-block">
+            <span class="text-muted small">Realizada el @Model.FechaVenta.ToString("dd MMM yyyy, HH:mm")</span>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="detail-card">
+                <div class="detail-header d-flex justify-content-between align-items-center">
+                    <h5 class="detail-title"><i class="bi bi-bag me-2 text-muted"></i>Resumen del Pedido</h5>
+                    <span class="badge rounded-pill bg-light text-dark border">@Model.Productos.Count ítems</span>
+                </div>
+
+                <div class="p-0">
+                    @foreach (var producto in Model.Productos)
+                    {
+                        <div class="product-item">
+                            <div class="row align-items-center">
+                                <div class="col-auto">
+                                    <img src="@producto.ImagenUrl"
+                                         asp-append-version="true"
+                                         class="product-thumb"
+                                         alt="@producto.NombreProducto"
+                                         onerror="this.src='~/img/Img_Productos/default.jpg';" />
+                                </div>
+                                <div class="col">
+                                    <h6 class="fw-bold mb-1 text-dark">@producto.NombreProducto</h6>
+                                    <div class="text-muted small d-flex gap-3">
+                                        <span><i class="bi bi-palette me-1"></i>@producto.Color</span>
+                                        <span><i class="bi bi-rulers me-1"></i>Talla @producto.Talla</span>
+                                    </div>
+                                </div>
+                                <div class="col-auto text-end">
+                                    <div class="small text-muted mb-1">@producto.Cantidad x S/ @producto.PrecioUnitario.ToString("F2")</div>
+                                    <div class="fw-bold" style="color: #f1149b;">S/ @producto.Subtotal.ToString("F2")</div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                <div class="summary-section">
+                    <div class="row justify-content-end">
+                        <div class="col-md-6">
+                            @if (!string.IsNullOrEmpty(Model.CodigoCupon))
+                            {
+                                <div class="d-flex justify-content-between mb-2 text-muted">
+                                    <span>Subtotal</span>
+                                    <span>S/ @Model.SubtotalSinDescuento.ToString("F2")</span>
+                                </div>
+                                <div class="d-flex justify-content-between mb-2 text-success">
+                                    <span>
+                                        <i class="bi bi-ticket-perforated-fill me-1"></i>
+                                        Descuento (@Model.PorcentajeDescuento?.ToString("F0")%)
+                                    </span>
+                                    <span>- S/ @Model.Descuento.ToString("F2")</span>
+                                </div>
+                                <div class="d-flex justify-content-between mb-2 text-muted">
+                                    <span>Base Imponible</span>
+                                    <span>S/ @Model.BaseImponible.ToString("F2")</span>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="d-flex justify-content-between mb-2 text-muted">
+                                    <span>Base Imponible</span>
+                                    <span>S/ @Model.BaseImponible.ToString("F2")</span>
+                                </div>
+                            }
+
+                            <div class="d-flex justify-content-between mb-2 text-muted">
+                                <span>IGV (18%)</span>
+                                <span>S/ @Model.IGV.ToString("F2")</span>
+                            </div>
+
+                            <hr class="my-3">
+
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="fw-bold fs-5">Total Pagado</span>
+                                <span class="fw-bold fs-4" style="color: #f1149b;">S/ @Model.Total.ToString("F2")</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+
+            <div class="detail-card">
+                <div class="detail-header">
+                    <h5 class="detail-title fs-6 text-uppercase ls-1">Información de Pago</h5>
+                </div>
+                <div class="card-body p-4">
+                    <div class="mb-4">
+                        <label class="small text-muted fw-bold text-uppercase mb-1">Método de Pago</label>
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-credit-card me-2 fs-5 text-muted"></i>
+                            <span class="fw-medium">@Model.MetodoPago</span>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <div class="alert alert-warning py-2 px-3 mb-0" role="alert">
+                            <i class="bi bi-info-circle me-2"></i>
+                            <small class="fw-bold">No se aceptan devoluciones</small>
+                        </div>
+                    </div>
+
+                    <a asp-controller="Carrito" asp-action="DescargarBoleta" asp-route-id="@Model.IdVenta" class="btn btn-action-outline w-100">
+                        <i class="bi bi-file-earmark-pdf me-2"></i> Descargar Boleta
+                    </a>
+                </div>
+            </div>
+
+            @if (Model.Envio != null)
+            {
+                <div class="detail-card border-top border-4 border-warning">
+                    <div class="detail-header bg-light">
+                        <h5 class="detail-title fs-6 text-uppercase ls-1">
+                            <i class="bi bi-truck me-2"></i>Detalles de Envío
+                        </h5>
+                    </div>
+                    <div class="card-body p-4">
+
+                        <div class="mb-3 text-center">
+                            @{
+                                var envioClass = Model.Envio.EstadoEnvio.ToLower() switch
+                                {
+                                    "entregado" => "bg-success text-white",
+                                    "enviado" => "bg-info text-dark",
+                                    "en_proceso" => "bg-primary text-white",
+                                    _ => "bg-light text-dark border"
+                                };
+                                var iconoEnvio = Model.Envio.EstadoEnvio.ToLower() == "entregado" ? "bi-check-circle-fill" : "bi-box-seam";
+                            }
+                            <span class="badge rounded-pill @envioClass px-3 py-2 mb-2">
+                                <i class="bi @iconoEnvio me-1"></i> @Model.Envio.EstadoEnvio.ToUpper()
+                            </span>
+                        </div>
+
+                        <div class="mb-3">
+                            <small class="text-muted d-block">Empresa de Transporte</small>
+                            <strong>@Model.Envio.EmpresaTransporte</strong>
+                        </div>
+
+                        <div class="mb-3">
+                            <small class="text-muted d-block">Código de Seguimiento</small>
+                            <div class="d-flex align-items-center bg-light p-2 rounded border">
+                                <code class="text-dark me-auto">@Model.Envio.NumeroSeguimiento</code>
+                                <i class="bi bi-clipboard text-muted" style="cursor:pointer;" title="Copiar"></i>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <small class="text-muted d-block">Dirección de Entrega</small>
+                            <span class="d-block text-dark">@Model.Envio.DireccionEnvio</span>
+                            <span class="text-muted small">@Model.Envio.Ciudad, CP: @Model.Envio.CodigoPostal</span>
+                        </div>
+
+                        @if (Model.Envio.EstadoEnvio.ToLower() == "entregado" && Model.Envio.FechaEntregaReal.HasValue)
+                        {
+                            <div class="alert alert-success border mb-4">
+                                <small class="text-muted">Fecha de entrega:</small>
+                                <div class="fw-bold text-success">
+                                    <i class="bi bi-check-circle-fill me-1"></i>
+                                    @Model.Envio.FechaEntregaReal.Value.ToString("dd 'de' MMMM, yyyy")
+                                </div>
+                            </div>
+                        }
+                        else if (Model.Envio.EstadoEnvio.ToLower() == "cancelado")
+                        {
+                            <div class="alert alert-danger border mb-4">
+                                <small class="text-muted">Estado:</small>
+                                <div class="fw-bold text-danger">
+                                    <i class="bi bi-x-circle-fill me-1"></i>
+                                    Pedido cancelado
+                                </div>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="alert alert-light border mb-4">
+                                <small class="text-muted">Fecha estimada:</small>
+                                <div class="fw-bold text-dark">@Model.Envio.FechaEntregaEstimada.ToString("dd 'de' MMMM, yyyy")</div>
+                            </div>
+                        }
+
+                        <a asp-action="SeguimientoEnvio" asp-route-id="@Model.Envio.IdEnvio" class="btn btn-action-primary w-100 shadow-sm">
+                            Ver Seguimiento <i class="bi bi-arrow-right ms-1"></i>
+                        </a>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>

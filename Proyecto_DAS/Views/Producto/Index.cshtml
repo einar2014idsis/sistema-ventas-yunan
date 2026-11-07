@@ -1,0 +1,238 @@
+@model IEnumerable<Proyecto_DAS.ViewModels.Producto.ProductoViewModel>
+
+@using Microsoft.AspNetCore.Mvc.Rendering
+@{
+    ViewData["Title"] = "Gestión de Productos";
+    var filtros = ViewBag.Filtros as Proyecto_DAS.ViewModels.Producto.ProductoFilterViewModel;
+    var categorias = ViewBag.Categorias as List<SelectListItem>;
+}
+
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <h1 class="display-4">@ViewData["Title"]</h1>
+            <hr />
+        </div>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <strong>Éxito!</strong> @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <strong>Error!</strong> @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="row mb-3">
+        <div class="col-md-12 d-flex justify-content-between">
+            <a asp-controller="Home" asp-action="PanelAdministrador" class="btn btn-secondary">
+                <i class="bi bi-arrow-left-circle"></i> Volver al Panel
+            </a>
+            <a asp-action="Create" class="btn btn-primary">
+                <i class="bi bi-plus-circle"></i> Nuevo Producto
+            </a>
+        </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="card mb-4" style="background-color: #f8cde7;">
+        <div class="card-header" style="background-color: #f1149b; color: white;">
+            <h5 class="mb-0"><i class="bi bi-funnel-fill"></i> Filtros de Busqueda</h5>
+        </div>
+        <div class="card-body">
+            <form method="get" asp-action="Index" autocomplete="off">
+                <div class="row">
+                    <div class="col-md-3">
+                        <label for="NombreProducto" class="form-label">Nombre Producto</label>
+                        <input type="text" name="NombreProducto" id="NombreProducto" class="form-control"
+                               placeholder="Buscar por nombre" value="@filtros?.NombreProducto" />
+                    </div>
+                    <div class="col-md-3">
+                        <label for="CategoriaId" class="form-label">Categoría</label>
+                        <select name="CategoriaId" class="form-select">
+                            <option value="">-- Todas --</option>
+                            @if (categorias != null)
+                            {
+                                @foreach (var cat in categorias)
+                                {
+                                    var isSelected = filtros?.CategoriaId != null && filtros.CategoriaId.ToString() == cat.Value;
+                                    <option value="@cat.Value" selected="@isSelected">@cat.Text</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label for="Estado" class="form-label">Estado</label>
+                        <select name="Estado" class="form-select">
+                            <option value="">-- Todos --</option>
+                            @if (filtros?.Estado == true)
+                            {
+                                <option value="true" selected>Activos</option>
+                            }
+                            else
+                            {
+                                <option value="true">Activos</option>
+                            }
+                            @if (filtros?.Estado == false)
+                            {
+                                <option value="false" selected>Inactivos</option>
+                            }
+                            else
+                            {
+                                <option value="false">Inactivos</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label for="StockBajo" class="form-label">Stock</label>
+                        <select name="StockBajo" class="form-select">
+                            <option value="">-- Todos --</option>
+                            @if (filtros?.StockBajo == true)
+                            {
+                                <option value="true" selected>Stock Bajo</option>
+                            }
+                            else
+                            {
+                                <option value="true">Stock Bajo</option>
+                            }
+                            @if (filtros?.StockBajo == false)
+                            {
+                                <option value="false" selected>Stock Normal</option>
+                            }
+                            else
+                            {
+                                <option value="false">Stock Normal</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-2 d-flex align-items-end">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="bi bi-search"></i> Buscar
+                        </button>
+                    </div>
+                </div>
+                <div class="row mt-2">
+                    <div class="col-md-12">
+                        <a asp-action="Index" class="btn btn-secondary btn-sm">
+                            <i class="bi bi-x-circle"></i> Limpiar filtros
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card shadow">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover table-striped">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Imagen</th>
+                                    <th>Nombre</th>
+                                    <th>Categoria</th>
+                                    <th>Proveedor</th>
+                                    <th>Precio Venta</th>
+                                    <th>Stock Total</th>
+                                    <th>Estado</th>
+                                    <th class="text-center">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (Model.Any())
+                                {
+                                    @foreach (var item in Model)
+                                    {
+                                        <tr class="@(item.TieneStockBajo ? "table-warning" : "")">
+                                            <td>
+                                                <div style="width: 50px; height: 50px; overflow: hidden; background-color: #f0f0f0;">
+                                                    <img src="@item.ImagenUrl" alt="@item.Nombre"
+                                                         asp-append-version="true"
+                                                         style="width: 100%; height: 100%; object-fit: contain;"
+                                                         onerror="this.src='/img/Img_Productos/default.jpg';" />
+                                                </div>
+                                            </td>
+                                            <td>
+                                                @Html.DisplayFor(modelItem => item.Nombre)
+                                                @if (item.TieneStockBajo)
+                                                {
+                                                    <span class="badge bg-warning text-dark ms-2">
+                                                        <i class="bi bi-exclamation-triangle"></i> @item.VariantesConStockBajo var.
+                                                    </span>
+                                                }
+                                            </td>
+                                            <td>@Html.DisplayFor(modelItem => item.CategoriaNombre)</td>
+                                            <td>@Html.DisplayFor(modelItem => item.ProveedorNombre)</td>
+                                            <td>S/ @item.PrecioVenta.ToString("N2")</td>
+                                            <td>
+                                                <span class="badge @(item.TieneStockBajo ? "bg-warning text-dark" : "bg-success")">
+                                                    @item.StockActual
+                                                </span>
+                                            </td>
+                                            <td>
+                                                @if (item.Estado)
+                                                {
+                                                    <span class="badge bg-success">Activo</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-secondary">Inactivo</span>
+                                                }
+                                            </td>
+                                            <td class="text-center">
+                                                <a asp-action="Details" asp-route-id="@item.IdProducto" class="btn btn-sm btn-info" title="Ver detalles">
+                                                    <i class="bi bi-eye"></i>
+                                                </a>
+                                                <a asp-action="Edit" asp-route-id="@item.IdProducto" class="btn btn-sm btn-warning" title="Editar">
+                                                    <i class="bi bi-pencil"></i>
+                                                </a>
+                                                <a asp-action="Delete" asp-route-id="@item.IdProducto" class="btn btn-sm btn-danger"
+                                                   onclick="return confirm('¿Estas seguro de eliminar este producto?')">
+                                                    <i class="bi bi-trash-fill"></i> Eliminar
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td colspan="8" class="text-center text-muted">
+                                            <p class="mt-3 mb-3">No hay productos registrados.</p>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/validaciones.js"></script>
+    <script>
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        });
+
+        setTimeout(function() {
+            $('.alert').fadeOut('slow');
+        }, 5000);
+
+        ValidacionesYUNAN.validarPorId('NombreProducto', 'letrasNumerosEspacios');
+    </script>
+}

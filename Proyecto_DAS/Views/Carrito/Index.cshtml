@@ -1,0 +1,398 @@
+@model List<Proyecto_DAS.ViewModels.Carrito.CarritoItemViewModel>
+@{
+    ViewData["Title"] = "Carrito de Compras";
+    Layout = "_LayoutCliente";
+    var total = Model.Sum(x => x.Subtotal);
+}
+
+<div class="container mt-4">
+    @if (!Model.Any())
+    {
+        <div class="text-center py-5">
+            <i class="bi bi-cart-x" style="font-size: 4rem; color: #f1149b;"></i>
+            <h4 class="mt-3">Tu carrito está vacío</h4>
+            <p class="text-muted">Agrega productos desde el catálogo</p>
+            <a asp-controller="ClientePanel" asp-action="Index" class="btn btn-primary" style="background-color: #f1149b; border-color: #f1149b;">
+                <i class="bi bi-shop me-2"></i>Ir al catálogo
+            </a>
+        </div>
+    }
+    else
+    {
+        <div class="row">
+            <div class="col-lg-8">
+                @foreach (var item in Model)
+                {
+                    <div class="card shadow-sm mb-3">
+                        <div class="row g-0 align-items-center">
+                            <div class="col-auto p-2">
+                                <div style="width: 100px; height: 100px; overflow: hidden; border: 1px solid #dee2e6; background-color: #f0f0f0;">
+                                    <img src="@item.ImagenUrl" class="img-fluid rounded-start" asp-append-version="true" style="object-fit: contain; width: 100%; height: 100%;" onerror="this.src='~/img/Img_Productos/default.jpg';">
+                                </div>
+                            </div>
+
+                            <div class="col-5 col-md-5 p-2">
+                                <div class="card-body p-0">
+                                    <h6 class="card-title fw-bold mb-1">@item.NombreProducto</h6>
+                                    <p class="card-text text-muted mb-0 small">Categoría: @item.Categoria</p>
+                                    <p class="card-text text-muted mb-0 small">Color: @item.Color</p>
+                                    <p class="card-text text-muted mb-0 small">Talla: @item.Talla</p>
+                                </div>
+                            </div>
+
+                            <div class="col-4 col-md-4 p-2 text-end">
+                                <div class="mb-2">
+                                    <span class="small text-muted">Cantidad: @item.Cantidad</span>
+                                </div>
+
+                                <p class="mb-1 small text-muted">S/ @item.PrecioUnitario.ToString("F2") c/u</p>
+                                <h5 class="fw-bold mb-2" style="color: #f1149b;">
+                                    S/ @item.Subtotal.ToString("F2")
+                                </h5>
+
+                                <button type="button" class="btn btn-sm btn-outline-primary me-1 js-editar-item"
+                                        data-producto-id="@item.ProductoId"
+                                        data-producto-variante-id="@item.ProductoVarianteId"
+                                        data-producto-nombre="@item.NombreProducto"
+                                        data-producto-imagen="@item.ImagenUrl"
+                                        data-producto-precio="@item.PrecioUnitario.ToString("F2")"
+                                        data-producto-stock="@item.StockDisponible"
+                                        data-talla-actual="@item.Talla"
+                                        data-color-actual="@item.Color"
+                                        data-cantidad-actual="@item.Cantidad">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+
+                                <form asp-action="Eliminar" method="post" class="d-inline" autocomplete="off">
+                                    <input type="hidden" name="productoVarianteId" value="@item.ProductoVarianteId" />
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            @{
+                var subtotalSinIGV = total / 1.18m;
+                var igv = total - subtotalSinIGV;
+            }
+            <div class="col-lg-4">
+                <div class="card shadow-sm">
+                    <div class="card-header" style="background-color: #f8cde7;">
+                        <h5 class="mb-0"><i class="bi bi-receipt me-2"></i>Resumen</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Productos (@Model.Sum(x => x.Cantidad))</span>
+                            <span>S/ @subtotalSinIGV.ToString("F2")</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>IGV (18%)</span>
+                            <span>S/ @igv.ToString("F2")</span>
+                        </div>
+                        <hr />
+                        <div class="d-flex justify-content-between mb-3">
+                            <strong>Total</strong>
+                            <strong style="color: #f1149b; font-size: 1.2rem;">S/ @total.ToString("F2")</strong>
+                        </div>
+
+                        <a asp-action="Checkout" class="btn w-100 mb-2" style="background-color: #f1149b; border-color: #f1149b; color: white;">
+                            <i class="bi bi-bag-check me-2"></i>Proceder al pago
+                        </a>
+
+                        <form asp-action="Vaciar" method="post" autocomplete="off">
+                            <button type="submit" class="btn btn-outline-secondary w-100">
+                                <i class="bi bi-trash me-2"></i>Vaciar carrito
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<!-- Modal para editar item del carrito -->
+<div class="modal fade" id="modalEditarItem" tabindex="-1" aria-labelledby="modalEditarItemLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header" style="background-color: #f8cde7;">
+                <h5 class="modal-title" id="modalEditarItemLabel">
+                    <i class="bi bi-pencil-square me-2"></i>Editar Producto
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-8">
+                        <h6 id="edit-producto-nombre" class="fw-bold mb-2"></h6>
+                        <p class="mb-1">
+                            <span class="fw-bold" style="color: #f1149b; font-size: 1.2rem;">S/ <span id="edit-producto-precio"></span></span>
+                        </p>
+                        <p class="text-muted mb-0" style="font-size: 0.85rem;">
+                            Stock disponible: <span id="edit-producto-stock" class="badge bg-success"></span>
+                        </p>
+                    </div>
+                </div>
+
+                <hr>
+
+                <!-- Selección de Talla -->
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Talla <span class="text-danger">*</span></label>
+                    <div id="edit-tallas-container" class="d-flex flex-wrap gap-2">
+
+                    </div>
+                    <small class="text-danger d-none" id="edit-error-talla">Por favor selecciona una talla</small>
+                </div>
+
+                <!-- Selección de Color -->
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Color <span class="text-danger">*</span></label>
+                    <div id="edit-colores-container" class="d-flex flex-wrap gap-2">
+
+                    </div>
+                    <small class="text-danger d-none" id="edit-error-color">Por favor selecciona un color</small>
+                </div>
+
+                <!-- Cantidad -->
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Cantidad</label>
+                    <div class="input-group" style="max-width: 150px;">
+                        <button class="btn btn-outline-secondary" type="button" id="edit-btn-decrementar">
+                            <i class="bi bi-dash"></i>
+                        </button>
+                        <input type="number" class="form-control text-center" id="edit-cantidad" value="1" min="1" readonly>
+                        <button class="btn btn-outline-secondary" type="button" id="edit-btn-incrementar">
+                            <i class="bi bi-plus"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn" style="background-color: #f1149b; border-color: #f1149b; color: white;" id="btn-confirmar-edicion">
+                    <i class="bi bi-check-circle me-1"></i>Guardar Cambios
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            let itemEdicion = {};
+            let tallaSeleccionada = null;
+            let colorSeleccionado = null;
+            const modalEditar = new bootstrap.Modal(document.getElementById('modalEditarItem'));
+
+            // Abrir modal de edición
+            $('.js-editar-item').on('click', function () {
+
+                itemEdicion = {
+                    productoId: $(this).data('producto-id'),
+                    productoVarianteId: $(this).data('producto-variante-id'),
+                    nombre: $(this).data('producto-nombre'),
+                    imagen: $(this).data('producto-imagen'),
+                    precio: $(this).data('producto-precio'),
+                    stock: $(this).data('producto-stock'),
+                    tallaActual: String($(this).data('talla-actual')).trim(),
+                    colorActual: String($(this).data('color-actual')).trim(),
+                    cantidadActual: $(this).data('cantidad-actual')
+                };
+
+                $('#edit-error-talla, #edit-error-color').addClass('d-none');
+
+                $('#edit-producto-nombre').text(itemEdicion.nombre);
+                $('#edit-producto-imagen').attr('src', itemEdicion.imagen);
+                $('#edit-producto-precio').text(itemEdicion.precio);
+                $('#edit-producto-stock').text(itemEdicion.stock + ' unidades');
+                $('#edit-cantidad').val(itemEdicion.cantidadActual);
+
+                $.ajax({
+                    url: '/ClientePanel/ObtenerOpcionesProducto',
+                    type: 'GET',
+                    data: { productoId: itemEdicion.productoId },
+                    success: function (response) {
+                        if (response.success) {
+                            itemEdicion.variantes = response.variantes;
+
+                            const tallasContainer = $('#edit-tallas-container');
+                            tallasContainer.empty();
+                            response.tallas.forEach(function (talla) {
+                                const tallaTrimmed = String(talla).trim();
+                                const isActual = tallaTrimmed === itemEdicion.tallaActual;
+                                const activeClass = isActual ? 'active' : '';
+                                const activeStyle = isActual ? 'background-color: #f1149b; color: white; border-color: #f1149b;' : '';
+
+                                tallasContainer.append(`
+                                    <button type="button" class="btn btn-outline-secondary btn-edit-talla ${activeClass}" data-talla="${tallaTrimmed}" style="${activeStyle}">
+                                        ${tallaTrimmed}
+                                    </button>
+                                `);
+
+                                if (isActual) {
+                                    tallaSeleccionada = tallaTrimmed;
+                                }
+                            });
+
+                            // Cargar colores
+                            const coloresContainer = $('#edit-colores-container');
+                            coloresContainer.empty();
+                            response.colores.forEach(function (color) {
+                                const colorTrimmed = String(color).trim();
+                                const isActual = colorTrimmed === itemEdicion.colorActual;
+                                const activeClass = isActual ? 'active' : '';
+                                const activeStyle = isActual ? 'background-color: #f1149b; color: white; border-color: #f1149b;' : '';
+
+                                coloresContainer.append(`
+                                    <button type="button" class="btn btn-outline-secondary btn-edit-color ${activeClass}" data-color="${colorTrimmed}" style="${activeStyle}">
+                                        ${colorTrimmed}
+                                    </button>
+                                `);
+
+                                if (isActual) {
+                                    colorSeleccionado = colorTrimmed;
+                                }
+                            });
+
+                            actualizarStockVarianteEdit();
+
+                            modalEditar.show();
+                        } else {
+                            alert(response.message);
+                        }
+                    },
+                    error: function () {
+                        alert('Error al cargar las opciones del producto.');
+                    }
+                });
+            });
+
+            // Función para actualizar stock según variante seleccionada
+            function actualizarStockVarianteEdit() {
+                if (tallaSeleccionada && colorSeleccionado && itemEdicion.variantes) {
+                    const variante = itemEdicion.variantes.find(
+                        v => String(v.talla).trim() === String(tallaSeleccionada).trim() &&
+                             String(v.color).trim() === String(colorSeleccionado).trim()
+                    );
+                    if (variante) {
+                        itemEdicion.stock = variante.stockActual;
+                        $('#edit-producto-stock').text(variante.stockActual + ' unidades');
+                        let cantidadActual = parseInt($('#edit-cantidad').val());
+                        if (cantidadActual > variante.stockActual) {
+                            $('#edit-cantidad').val(variante.stockActual > 0 ? 1 : 0);
+                        }
+                    } else {
+                        itemEdicion.stock = 0;
+                        $('#edit-producto-stock').text('0 - Combinación no disponible');
+                    }
+                }
+            }
+
+            // Seleccionar talla
+            $(document).on('click', '.btn-edit-talla', function () {
+                $('.btn-edit-talla').removeClass('active').css({
+                    'background-color': '',
+                    'color': '',
+                    'border-color': ''
+                });
+                $(this).addClass('active').css({
+                    'background-color': '#f1149b',
+                    'color': 'white',
+                    'border-color': '#f1149b'
+                });
+                tallaSeleccionada = String($(this).data('talla')).trim();
+                $('#edit-error-talla').addClass('d-none');
+                actualizarStockVarianteEdit();
+            });
+
+            // Seleccionar color
+            $(document).on('click', '.btn-edit-color', function () {
+                $('.btn-edit-color').removeClass('active').css({
+                    'background-color': '',
+                    'color': '',
+                    'border-color': ''
+                });
+                $(this).addClass('active').css({
+                    'background-color': '#f1149b',
+                    'color': 'white',
+                    'border-color': '#f1149b'
+                });
+                colorSeleccionado = String($(this).data('color')).trim();
+                $('#edit-error-color').addClass('d-none');
+                actualizarStockVarianteEdit();
+            });
+
+            // Incrementar cantidad
+            $('#edit-btn-incrementar').on('click', function () {
+                let cantidad = parseInt($('#edit-cantidad').val());
+                if (cantidad < itemEdicion.stock) {
+                    $('#edit-cantidad').val(cantidad + 1);
+                }
+            });
+
+            // Decrementar cantidad
+            $('#edit-btn-decrementar').on('click', function () {
+                let cantidad = parseInt($('#edit-cantidad').val());
+                if (cantidad > 1) {
+                    $('#edit-cantidad').val(cantidad - 1);
+                }
+            });
+
+            // Confirmar edición
+            $('#btn-confirmar-edicion').on('click', function () {
+                let valido = true;
+
+                if (!tallaSeleccionada) {
+                    $('#edit-error-talla').removeClass('d-none');
+                    valido = false;
+                }
+
+                if (!colorSeleccionado) {
+                    $('#edit-error-color').removeClass('d-none');
+                    valido = false;
+                }
+
+                if (!valido) {
+                    return;
+                }
+
+                const cantidad = parseInt($('#edit-cantidad').val());
+                const btn = $(this);
+                btn.prop('disabled', true);
+
+                $.ajax({
+                    url: '/ClientePanel/EditarItemCarrito',
+                    type: 'POST',
+                    data: {
+                        productoId: itemEdicion.productoId,
+                        productoVarianteIdAnterior: itemEdicion.productoVarianteId,
+                        tallaNueva: tallaSeleccionada,
+                        colorNuevo: colorSeleccionado,
+                        cantidad: cantidad
+                    },
+                    success: function (respuesta) {
+                        if (respuesta.success) {
+                            modalEditar.hide();
+                            location.reload();
+                        } else {
+                            alert(respuesta.message);
+                        }
+                    },
+                    error: function () {
+                        alert('Error de conexión con el servidor.');
+                    },
+                    complete: function () {
+                        btn.prop('disabled', false);
+                    }
+                });
+            });
+        });
+    </script>
+}
+

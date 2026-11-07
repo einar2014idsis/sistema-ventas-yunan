@@ -1,0 +1,59 @@
+@model Proyecto_DAS.ViewModels.Categoria.CategoriaViewModel
+
+@{
+    ViewData["Title"] = "Detalles de Categoría";
+}
+
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <h1 class="display-4">@ViewData["Title"]</h1>
+            <hr />
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card shadow">
+                <div class="card-body">
+                    <dl class="row">
+                        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.IdCategoria)</dt>
+                        <dd class="col-sm-9">@Html.DisplayFor(model => model.IdCategoria)</dd>
+
+                        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Nombre)</dt>
+                        <dd class="col-sm-9">@Html.DisplayFor(model => model.Nombre)</dd>
+
+                        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Descripcion)</dt>
+                        <dd class="col-sm-9">@Html.DisplayFor(model => model.Descripcion)</dd>
+
+                        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Estado)</dt>
+                        <dd class="col-sm-9">
+                            @if (Model.Estado)
+                            {
+                                <span class="badge bg-success">Activo</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary">Inactivo</span>
+                            }
+                        </dd>
+
+                        @if (Model.CantidadProductos > 0)
+                        {
+                            <dt class="col-sm-3">Productos Asociados</dt>
+                            <dd class="col-sm-9">
+                                <span class="badge bg-info">@Model.CantidadProductos producto(s)</span>
+                            </dd>
+                        }
+                    </dl>
+
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                        <a asp-action="Index" class="btn btn-secondary me-md-2">
+                            <i class="bi bi-arrow-left-circle-fill"></i> Volver al listado
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

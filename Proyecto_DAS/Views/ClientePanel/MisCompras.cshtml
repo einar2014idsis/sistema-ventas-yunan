@@ -1,0 +1,343 @@
+@model List<Proyecto_DAS.ViewModels.ClientePanel.MisComprasViewModel>
+@{
+    ViewData["Title"] = "Mis Compras";
+    Layout = "_LayoutCliente";
+    var compraExitosa = TempData["EmailEnviado"] != null || TempData["EmailNoEnviado"] != null;
+}
+
+<style>
+    .order-card {
+        background: white;
+        border: 1px solid #f0f0f0;
+        border-radius: 12px;
+        transition: all 0.3s ease;
+        overflow: hidden;
+        position: relative;
+    }
+
+        .order-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            border-color: rgba(241, 20, 155, 0.2);
+        }
+
+    .status-indicator {
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 5px;
+    }
+
+    .order-header {
+        background-color: #fdfdfd;
+        padding: 1rem 1.5rem;
+        border-bottom: 1px solid #f0f0f0;
+    }
+
+    .order-body {
+        padding: 1.5rem;
+    }
+
+    .order-footer {
+        padding: 1rem 1.5rem;
+        background-color: white;
+        border-top: 1px solid #f8f8f8;
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .price-tag {
+        font-family: 'Montserrat', sans-serif;
+        font-weight: 700;
+        color: #f1149b;
+        font-size: 1.2rem;
+    }
+
+    .status-pill {
+        padding: 0.35em 0.8em;
+        border-radius: 50px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+        .status-pill.success {
+            background-color: #e6f9f0;
+            color: #0f9d58;
+        }
+
+        .status-pill.warning {
+            background-color: #fff8e1;
+            color: #fbc02d;
+        }
+
+        .status-pill.danger {
+            background-color: #fceceb;
+            color: #d32f2f;
+        }
+
+        .status-pill.info {
+            background-color: #e3f2fd;
+            color: #1976d2;
+        }
+
+        .status-pill.neutral {
+            background-color: #f5f5f5;
+            color: #616161;
+        }
+
+    .empty-state-icon {
+        background-color: rgba(241, 20, 155, 0.05);
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1.5rem;
+    }
+
+    .modal-capi-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.6);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+        animation: fadeIn 0.3s ease;
+    }
+
+    .modal-capi-content {
+        background: white;
+        border-radius: 20px;
+        padding: 2rem;
+        text-align: center;
+        max-width: 400px;
+        width: 90%;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        animation: bounceIn 0.5s ease;
+    }
+
+    .capi-image {
+        width: 180px;
+        height: 180px;
+        object-fit: contain;
+        animation: bounce 1s infinite;
+    }
+
+    .capi-title {
+        font-family: 'Playfair Display', serif;
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: #f1149b;
+        margin: 1rem 0 0.5rem;
+    }
+
+    .capi-message {
+        color: #666;
+        font-size: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .btn-capi {
+        background: linear-gradient(135deg, #f1149b 0%, #ff6b9d 100%);
+        color: white;
+        border: none;
+        padding: 0.8rem 2.5rem;
+        border-radius: 50px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .btn-capi:hover {
+        transform: scale(1.05);
+        box-shadow: 0 5px 20px rgba(241, 20, 155, 0.4);
+    }
+
+    @@keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    @@keyframes bounceIn {
+        0% { transform: scale(0.5); opacity: 0; }
+        60% { transform: scale(1.1); }
+        100% { transform: scale(1); opacity: 1; }
+    }
+
+    @@keyframes bounce {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-10px); }
+    }
+</style>
+
+<div class="container py-5">
+
+    <div class="mb-5">
+        <h2 class="fw-bold" style="font-family: 'Playfair Display', serif;">Mis Pedidos</h2>
+        <p class="text-muted">Historial de tus compras y estado de envíos.</p>
+    </div>
+
+    @if (TempData["EmailEnviado"] != null && (bool)TempData["EmailEnviado"])
+    {
+        <div class="alert alert-success alert-dismissible fade show d-flex align-items-center shadow-sm" role="alert">
+            <i class="bi bi-check-circle-fill me-3" style="font-size: 1.5rem;"></i>
+            <div>
+                <strong>¡Compra realizada con éxito!</strong> Tu boleta fue enviada a tu correo electrónico y tambien puedes descargarla en "Mis compras".
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (TempData["EmailNoEnviado"] != null && (bool)TempData["EmailNoEnviado"])
+    {
+        <div class="alert alert-warning alert-dismissible fade show d-flex align-items-center shadow-sm" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-3" style="font-size: 1.5rem;"></i>
+            <div>
+                <strong>¡Compra realizada con éxito!</strong> No se pudo enviar la boleta por email debido a problemas de red. Puedes descargarla en "Mis Compras".
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (!Model.Any())
+    {
+        <div class="text-center py-5">
+            <div class="empty-state-icon">
+                <i class="bi bi-bag-heart" style="font-size: 3.5rem; color: #f1149b;"></i>
+            </div>
+            <h4 class="fw-bold mb-2">Aún no has realizado compras</h4>
+            <p class="text-muted mb-4" style="max-width: 400px; margin: 0 auto;">
+                Nuestra nueva colección está esperando por ti. Encuentra prendas únicas para tu estilo.
+            </p>
+            <a asp-controller="ClientePanel" asp-action="Index" class="btn rounded-pill px-5 py-2 shadow-sm fw-bold text-white" style="background-color: #f1149b;">
+                <i class="bi bi-shop me-2"></i>Ir a la Tienda
+            </a>
+        </div>
+    }
+    else
+    {
+        <div class="row g-4">
+            @foreach (var compra in Model)
+            {
+                var colorClass = compra.EstadoEnvio?.ToLower() switch
+                {
+                    "entregado" => "success",
+                    "cancelado" => "danger",
+                    "pendiente" => "warning",
+                    _ => "info"
+                };
+
+                var borderColor = colorClass switch
+                {
+                    "success" => "#0f9d58",
+                    "danger" => "#d32f2f",
+                    "warning" => "#fbc02d",
+                    _ => "#1976d2"
+                };
+
+                <div class="col-lg-6">
+                    <div class="order-card h-100 d-flex flex-column">
+                        <div class="status-indicator" style="background-color: @borderColor;"></div>
+
+                        <div class="order-header d-flex justify-content-between align-items-center">
+                            <div>
+                                <span class="text-muted small text-uppercase fw-bold">Orden #</span>
+                                <span class="fw-bold text-dark">@compra.IdVenta</span>
+                            </div>
+                            <div class="text-muted small">
+                                <i class="bi bi-calendar3 me-1"></i> @compra.FechaVenta.ToString("dd MMM yyyy")
+                            </div>
+                        </div>
+
+                        <div class="order-body flex-grow-1">
+                            <div class="row align-items-center">
+                                <div class="col-6">
+                                    <div class="small text-muted mb-1">Total Pagado</div>
+                                    <div class="price-tag">S/ @compra.Total.ToString("F2")</div>
+                                    <div class="small text-muted mt-1">
+                                        <i class="bi bi-basket me-1"></i> @compra.CantidadProductos producto(s)
+                                    </div>
+                                </div>
+                                <div class="col-6 text-end">
+                                    @if (compra.IdEnvio != null)
+                                    {
+                                        <span class="status-pill @colorClass">
+                                            @compra.EstadoEnvio.ToUpper()
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="status-pill neutral">SIN ENVÍO</span>
+                                    }
+                                </div>
+                            </div>
+
+                            @if (compra.IdEnvio != null)
+                            {
+                                <div class="mt-3 p-2 bg-light rounded small text-muted border border-light">
+                                    <i class="bi bi-truck me-1"></i> Tracking: <span class="text-dark font-monospace">@compra.NumeroSeguimiento</span>
+                                </div>
+                            }
+                        </div>
+
+                        <div class="order-footer">
+                            <a asp-controller="Carrito" asp-action="DescargarBoleta" asp-route-id="@compra.IdVenta"
+                               class="btn btn-sm btn-link text-secondary text-decoration-none" title="Descargar Boleta">
+                                <i class="bi bi-file-earmark-arrow-down fs-5"></i>
+                            </a>
+
+                            <a asp-action="DetalleCompra" asp-route-id="@compra.IdVenta"
+                               class="btn btn-sm btn-outline-dark rounded-pill px-3">
+                                Ver Detalles
+                            </a>
+
+                            @if (compra.IdEnvio != null)
+                            {
+                                <a asp-action="SeguimientoEnvio" asp-route-id="@compra.IdEnvio"
+                                   class="btn btn-sm text-white rounded-pill px-3 shadow-sm" style="background-color: #f1149b;">
+                                    <i class="bi bi-geo-alt-fill me-1"></i> Rastrear
+                                </a>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@if (compraExitosa)
+{
+    <div class="modal-capi-overlay" id="modalCapibara">
+        <div class="modal-capi-content">
+            <img src="~/img/target-capi.png" alt="Capibara feliz" class="capi-image" />
+            <h2 class="capi-title">Compra Exitosa!</h2>
+            <p class="capi-message">Gracias por tu compra. Tu pedido esta en camino.</p>
+            <button class="btn-capi" onclick="cerrarModalCapi()">Continuar</button>
+        </div>
+    </div>
+
+    <script>
+        function cerrarModalCapi() {
+            document.getElementById('modalCapibara').style.display = 'none';
+        }
+
+        // Cerrar al hacer clic fuera del modal
+        document.getElementById('modalCapibara').addEventListener('click', function(e) {
+            if (e.target === this) {
+                cerrarModalCapi();
+            }
+        });
+    </script>
+}

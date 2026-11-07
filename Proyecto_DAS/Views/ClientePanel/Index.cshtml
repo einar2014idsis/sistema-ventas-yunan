@@ -1,0 +1,2164 @@
+
+@model Proyecto_DAS.ViewModels.ClientePanel.CatalogoFilterViewModel
+
+@{
+    ViewData["Title"] = "YUNAN | Descubre tu estilo";
+    Layout = "_LayoutCliente";
+
+    var categoriaActual = Model.CategoriaId.ToString();
+    var categoriaSeleccionada = Model.Categorias
+        .Any(c => c.Value == categoriaActual);
+
+    // Imágenes ya guardadas en wwwroot/img/Categorias.
+    // Una categoría no registrada se muestra sin enlace, para evitar resultados falsos.
+    var categoriasVisuales = new[]
+    {
+        new { Nombre = "Casacas",     Imagen = "categoria_casacas.png",    Claves = new[] { "casaca", "chaqueta", "chompa" } },
+        new { Nombre = "Polos",       Imagen = "categoria_polos.png",      Claves = new[] { "polo", "top", "blusa" } },
+        new { Nombre = "Pantalones",  Imagen = "categoria_pantalones.png", Claves = new[] { "pantal", "jean" } },
+        new { Nombre = "Faldas",      Imagen = "categoria_faldas.png",     Claves = new[] { "falda" } },
+        new { Nombre = "Vestidos",    Imagen = "categoria_vestidos.png",   Claves = new[] { "vestido" } },
+        new { Nombre = "Conjuntos",   Imagen = "categoria_conjuntos.png",  Claves = new[] { "conjunto" } },
+        new { Nombre = "Accesorios",  Imagen = "categoria_accesorios.png", Claves = new[] { "accesorio" } }
+    };
+}
+
+<style>
+    /* Carrusel principal */
+
+    .yunan-banner-section {
+        width: 100%;
+        max-width: 1600px;
+        padding: 0 18px;
+        margin: 24px auto 38px;
+    }
+
+    .yunan-carousel {
+        position: relative;
+        overflow: hidden;
+        border-radius: 22px;
+        background: #fff0f7;
+        box-shadow: 0 14px 40px rgba(241,20,155,.12);
+    }
+
+    .yunan-carousel .carousel-item img {
+        display: block;
+        width: 100%;
+        height: auto;
+    }
+
+    .yunan-carousel .carousel-control-prev,
+    .yunan-carousel .carousel-control-next {
+        width: 7%;
+        opacity: .8;
+        transition: opacity .3s ease;
+    }
+
+    .yunan-carousel .carousel-control-prev:hover,
+    .yunan-carousel .carousel-control-next:hover {
+        opacity: 1;
+    }
+
+    .yunan-carousel .carousel-control-prev-icon,
+    .yunan-carousel .carousel-control-next-icon {
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        background-color: rgba(30,20,35,.45);
+        background-size: 55%;
+    }
+
+    .yunan-carousel .carousel-indicators {
+        margin-bottom: 12px;
+    }
+
+    .yunan-carousel .carousel-indicators button {
+        width: 10px;
+        height: 10px;
+        margin: 0 5px;
+        border: none;
+        border-radius: 50%;
+        background-color: #f1149b;
+        opacity: .45;
+        transition: all .3s ease;
+    }
+
+    .yunan-carousel .carousel-indicators button.active {
+        width: 26px;
+        border-radius: 10px;
+        opacity: 1;
+    }
+
+    /* Encabezado de colección */
+
+    .yunan-catalog-section {
+        max-width: 1500px;
+    }
+
+    .yunan-collection-heading {
+        text-align: center;
+        margin: 15px auto 35px;
+    }
+
+    .yunan-heading-label {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 7px 17px;
+        background: #fff0f8;
+        color: #f1149b;
+        border-radius: 50px;
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: 1.5px;
+        margin-bottom: 14px;
+    }
+
+    .yunan-collection-heading h2 {
+        font-family: 'Playfair Display', Georgia, serif;
+        font-size: clamp(30px, 4vw, 44px);
+        font-weight: 700;
+        color: #182039;
+        margin-bottom: 10px;
+    }
+
+    .yunan-collection-heading h2 span {
+        color: #f1149b;
+    }
+
+    .yunan-collection-heading p {
+        color: #8990a1;
+        font-size: 14px;
+    }
+
+    /* Distribución del catálogo */
+
+    .yunan-shop {
+        display: grid;
+        grid-template-columns: 260px minmax(0, 1fr);
+        gap: 25px;
+        align-items: start;
+    }
+
+    .yunan-shop-main {
+        min-width: 0;
+    }
+
+    /* Panel lateral de filtros */
+
+    .yunan-sidebar {
+        position: sticky;
+        top: 95px;
+        border-radius: 23px;
+        padding: 23px 19px;
+        background: linear-gradient(
+            155deg,
+            #ffffff 0%,
+            #fff1f8 100%
+        );
+        border: 1px solid #ffe0f0;
+        box-shadow: 0 12px 35px rgba(241,20,155,.09);
+    }
+
+    .yunan-sidebar-heading {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 23px;
+    }
+
+    .yunan-sidebar-heading h3 {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 800;
+        color: #192039;
+    }
+
+    .yunan-sidebar-heading h3 i {
+        color: #f1149b;
+        margin-right: 7px;
+    }
+
+    .yunan-clear-filters {
+        color: #f1149b;
+        font-size: 11px;
+        font-weight: 700;
+        text-decoration: none;
+    }
+
+    .yunan-clear-filters:hover {
+        color: #bb0875;
+        text-decoration: underline;
+    }
+
+    .yunan-filter-group {
+        margin-bottom: 22px;
+    }
+
+    .yunan-filter-label {
+        display: block;
+        font-size: 13px;
+        font-weight: 700;
+        color: #222942;
+        margin-bottom: 10px;
+    }
+
+    .yunan-filter-label i {
+        color: #f1149b;
+        margin-right: 6px;
+    }
+
+    .yunan-filter-control {
+        width: 100%;
+        min-height: 44px;
+        border: 1px solid #f7dce9;
+        border-radius: 12px;
+        background: rgba(255,255,255,.95);
+        color: #31364b;
+        padding: 10px 12px;
+        font-size: 13px;
+        transition: .2s ease;
+    }
+
+    .yunan-filter-control:focus {
+        border-color: #f1149b;
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(241,20,155,.10);
+    }
+
+    .yunan-filter-control.is-invalid {
+        border-color: #dc3545;
+    }
+
+    .yunan-search-box {
+        position: relative;
+    }
+
+    .yunan-search-box input {
+        padding-right: 39px;
+    }
+
+    .yunan-search-box > i {
+        position: absolute;
+        right: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #f1149b;
+        pointer-events: none;
+    }
+
+    .yunan-price-fields {
+        display: grid;
+        grid-template-columns: minmax(0,1fr) auto minmax(0,1fr);
+        gap: 8px;
+        align-items: center;
+    }
+
+    .yunan-price-fields input {
+        min-width: 0;
+        padding: 10px 8px;
+    }
+
+    .yunan-price-separator {
+        color: #c1a7b6;
+    }
+
+    .yunan-filter-hint {
+        color: #a2a0aa;
+        font-size: 11px;
+        margin-top: 8px;
+    }
+
+    .yunan-apply-button {
+        width: 100%;
+        padding: 13px 12px;
+        border: none;
+        border-radius: 13px;
+        background: linear-gradient(110deg,#f1149b,#ff4eb6);
+        color: white;
+        font-size: 13px;
+        font-weight: 800;
+        box-shadow: 0 8px 20px rgba(241,20,155,.23);
+        transition: .25s ease;
+    }
+
+    .yunan-apply-button:hover {
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 12px 25px rgba(241,20,155,.33);
+    }
+
+    .yunan-sidebar-footer {
+        text-align: center;
+        font-size: 11px;
+        color: #a0a2b0;
+        margin-top: 17px;
+    }
+
+    /* Categorías rápidas */
+
+    .yunan-category-section {
+        margin-bottom: 20px;
+    }
+
+    .yunan-category-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 14px;
+    }
+
+    .yunan-category-header h3 {
+        font-size: 18px;
+        font-weight: 800;
+        color: #192039;
+        margin: 0;
+    }
+
+    .yunan-category-header h3 i {
+        color: #f1149b;
+        margin-right: 6px;
+    }
+
+    .yunan-category-hint {
+        font-size: 11px;
+        color: #a2a2af;
+    }
+
+    .yunan-category-strip {
+        display: flex;
+        gap: 13px;
+        overflow-x: auto;
+        padding: 5px 3px 16px;
+        scrollbar-width: thin;
+        scrollbar-color: #f1149b #fff0f8;
+    }
+
+    .yunan-category-card {
+        flex: 0 0 116px;
+        min-height: 124px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 13px 8px;
+        text-align: center;
+        text-decoration: none;
+        color: #253049;
+        border: 1px solid #f7e0ec;
+        border-radius: 17px;
+        background: #fff;
+        box-shadow: 0 4px 12px rgba(30,20,40,.035);
+        transition: .25s ease;
+    }
+
+    .yunan-category-card:hover {
+        color: #f1149b;
+        border-color: #f1149b;
+        transform: translateY(-4px);
+        box-shadow: 0 10px 24px rgba(241,20,155,.13);
+    }
+
+    .yunan-category-card.active {
+        background: linear-gradient(145deg,#ff50ba,#ed008a);
+        border-color: transparent;
+        color: white;
+        box-shadow: 0 9px 23px rgba(241,20,155,.24);
+    }
+
+    .yunan-category-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 66px;
+        height: 66px;
+        border-radius: 17px;
+        margin-bottom: 10px;
+        background: linear-gradient(140deg,#fff0f8,#ffe2f1);
+        color: #f1149b;
+        font-size: 28px;
+    }
+
+    .yunan-category-card.active .yunan-category-icon {
+        background: rgba(255,255,255,.22);
+        color: white;
+    }
+
+    .yunan-category-name {
+        font-size: 12px;
+        font-weight: 700;
+        line-height: 1.3;
+        overflow-wrap: anywhere;
+    }
+
+    /* Encabezado de resultados */
+
+    .yunan-results-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin: 18px 0 23px;
+    }
+
+    .yunan-results-title {
+        font-size: 18px;
+        font-weight: 800;
+        color: #192039;
+        margin: 0;
+    }
+
+    .yunan-results-title i {
+        color: #f1149b;
+        margin-right: 6px;
+    }
+
+    .yunan-results-subtitle {
+        margin: 5px 0 0;
+        color: #9a9aa8;
+        font-size: 12px;
+    }
+
+    .yunan-mobile-filters {
+        display: none;
+        align-items: center;
+        gap: 8px;
+        border: 1px solid #f1149b;
+        background: white;
+        color: #f1149b;
+        border-radius: 12px;
+        padding: 10px 15px;
+        font-size: 12px;
+        font-weight: 700;
+    }
+
+    /* Tarjetas de productos */
+
+    .product-card {
+        border: none;
+        transition: all .3s ease;
+        background: transparent;
+    }
+
+    .product-image-wrapper {
+        position: relative;
+        overflow: hidden;
+        border-radius: 12px;
+        box-shadow: 0 5px 15px rgba(0,0,0,.05);
+        aspect-ratio: 3/4;
+    }
+
+    .product-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: top center;
+        transition: transform .5s ease;
+    }
+
+    .product-card:hover .product-img {
+        transform: scale(1.08);
+    }
+
+    .product-action-overlay {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        padding: 1rem;
+        background: linear-gradient(
+            to top,
+            rgba(0,0,0,.6),
+            transparent
+        );
+        opacity: 0;
+        transform: translateY(20px);
+        transition: all .3s ease;
+        display: flex;
+        justify-content: center;
+    }
+
+    .product-card:hover .product-action-overlay,
+    .product-card:focus-within .product-action-overlay {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    .btn-quick-add {
+        background: white;
+        color: #f1149b;
+        font-weight: 600;
+        border-radius: 50px;
+        padding: .5rem 1.5rem;
+        font-size: .9rem;
+        box-shadow: 0 4px 10px rgba(0,0,0,.2);
+        border: none;
+    }
+
+    .btn-quick-add:hover {
+        background: #f1149b;
+        color: white;
+    }
+
+    .product-info {
+        padding-top: 1rem;
+        text-align: center;
+    }
+
+    .product-category {
+        font-size: .75rem;
+        text-transform: uppercase;
+        color: #999;
+        letter-spacing: 1px;
+    }
+
+    .product-title {
+        font-weight: 600;
+        font-size: 1rem;
+        margin: .3rem 0;
+        color: #333;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .product-price {
+        color: #f1149b;
+        font-weight: 700;
+        font-size: 1.1rem;
+        font-family: 'Montserrat', sans-serif;
+    }
+
+    /* Paginación */
+
+    .pagination .page-link {
+        color: #333;
+        border: none;
+        margin: 0 5px;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+    }
+
+    .pagination .page-item.active .page-link {
+        background: #f1149b;
+        color: white;
+    }
+
+    /* Diseño para tabletas */
+
+    @@media (max-width: 1199px) {
+        .yunan-shop {
+            grid-template-columns: 235px minmax(0,1fr);
+            gap: 18px;
+        }
+
+        .yunan-category-card {
+            flex-basis: 105px;
+        }
+    }
+
+    /* Diseño para celulares */
+
+    @@media (max-width: 991px) {
+        .yunan-shop {
+            grid-template-columns: 1fr;
+            gap: 15px;
+        }
+
+        .yunan-sidebar {
+            display: none;
+            position: static;
+            margin-bottom: 10px;
+        }
+
+        .yunan-sidebar.is-open {
+            display: block;
+        }
+
+        .yunan-mobile-filters {
+            display: inline-flex;
+        }
+
+        .yunan-category-strip {
+            gap: 10px;
+        }
+
+        .yunan-banner-section {
+            padding: 0 10px;
+            margin: 14px auto 24px;
+        }
+
+        .yunan-carousel {
+            border-radius: 12px;
+        }
+
+        .yunan-carousel .carousel-control-prev-icon,
+        .yunan-carousel .carousel-control-next-icon {
+            width: 28px;
+            height: 28px;
+        }
+    }
+
+    @@media (max-width: 768px) {
+        .product-action-overlay {
+            opacity: 1;
+            transform: translateY(0);
+            padding: .5rem;
+        }
+
+        .btn-quick-add {
+            padding: .4rem .8rem;
+            font-size: .8rem;
+        }
+
+        .yunan-collection-heading {
+            margin-bottom: 25px;
+        }
+    }
+
+    @@media (max-width: 576px) {
+        .yunan-category-card {
+            flex-basis: 96px;
+            min-height: 105px;
+        }
+
+        .yunan-category-icon {
+            width: 51px;
+            height: 51px;
+            font-size: 23px;
+        }
+
+        .yunan-category-name {
+            font-size: 11px;
+        }
+
+        .yunan-results-title {
+            font-size: 15px;
+        }
+
+        .yunan-category-header h3 {
+            font-size: 16px;
+        }
+
+        .yunan-category-hint {
+            display: none;
+        }
+    }
+
+    @@media (prefers-reduced-motion: reduce) {
+        .yunan-carousel .carousel-item {
+            transition: none;
+        }
+
+        .yunan-category-card,
+        .yunan-apply-button {
+            transition: none;
+        }
+    }
+
+    /* YUNAN | Corrección del catálogo: ancho amplio y componentes compactos */
+    html { scroll-behavior: auto; }
+    body { overflow-x: clip; }
+    .yunan-banner-section,
+    .yunan-catalog-section {
+        position: relative;
+        left: 50%;
+        transform: translateX(-50%);
+        width: min(1900px, calc(100vw - 56px)) !important;
+        max-width: none !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+    }
+    .yunan-banner-section { padding: 0 !important; margin-top: 15px; margin-bottom: 16px; }
+    .yunan-catalog-section { padding: 8px 0 65px !important; }
+    .yunan-shop {
+        grid-template-columns: minmax(235px, 270px) minmax(0,1fr);
+        gap: clamp(18px,1.8vw,28px);
+    }
+    .yunan-sidebar { background: #fff; top: 92px; }
+    .yunan-shop-main { min-width: 0; }
+    .yunan-style-intro { margin: 0 0 16px; }
+    .yunan-style-kicker { display: none; }
+    .yunan-style-intro h1 {
+        font-family: 'Playfair Display', Georgia, serif;
+        color: #16213a; font-size: clamp(28px, 2.5vw, 39px);
+        font-weight: 800; line-height: 1.15; margin: 0 0 6px;
+    }
+    .yunan-style-intro h1 span { color: #f1149b; }
+    .yunan-style-intro p { font-size: 13px; color: #7b8393; margin: 0; }
+    .yunan-category-section { margin-bottom: 11px; }
+    .yunan-category-header { margin-bottom: 12px; }
+    .yunan-category-header h3 { font-size: 16px; }
+    .yunan-category-hint { font-weight: 700; color: #ec138d; text-decoration: none; }
+    .yunan-category-hint:hover { color: #ba0875; }
+    .yunan-category-strip {
+        display: flex; gap: clamp(7px,.75vw,12px); overflow-x: auto;
+        padding: 3px 3px 14px; scroll-snap-type: x proximity;
+        overscroll-behavior-inline: contain;
+    }
+    .yunan-category-card {
+        flex: 1 0 109px; max-width: 148px; min-width: 109px;
+        min-height: 125px; padding: 7px 7px 11px;
+        border-radius: 16px; gap: 7px; scroll-snap-align: start;
+        display: flex; flex-direction: column; align-items: center;
+        justify-content: space-between; text-align: center;
+    }
+    .yunan-category-card .yunan-category-icon:not(.yunan-category-photo) {
+        width: 64px; height: 64px; margin: auto 0 0;
+    }
+    .yunan-category-card.active { background: linear-gradient(150deg,#ff42b0,#ef008b); }
+    .yunan-category-photo {
+        display: block; width: 100%; height: 88px; flex: 0 0 88px;
+        border-radius: 12px; overflow: hidden; margin: 0; background: #fff0f7;
+    }
+    .yunan-category-photo img {
+        display:block; width:100%; height:100%; object-fit:contain;
+        object-position:center; transition: transform .25s ease;
+    }
+    .yunan-category-card:hover .yunan-category-photo img { transform: scale(1.055); }
+    .yunan-category-name { font-size: 11px; font-weight: 800; line-height: 1.15; }
+    .yunan-category-card.is-disabled { opacity: .58; cursor: not-allowed; }
+    .yunan-category-card.is-disabled:hover { border-color:#f7e0ec; color:#253049; transform:none; box-shadow:0 4px 12px rgba(30,20,40,.035); }
+    .yunan-category-card.active .yunan-category-icon { background: rgba(255,255,255,.23); }
+    .yunan-results-header { margin: 7px 0 16px; scroll-margin-top: 108px; }
+    #productos { scroll-margin-top: 105px; }
+    .yunan-results-title { font-size: 18px; }
+    .yunan-results-counter { font-size: 12px; color: #d30a84; background:#fff0f7; border-radius:30px; padding:8px 12px; }
+    .yunan-premium-card {
+        border:1px solid #f7e4ee; border-radius:16px; background:#fff;
+        padding:7px 7px 12px; overflow:hidden;
+        box-shadow:0 6px 22px rgba(45,24,45,.055);
+    }
+    .yunan-premium-card:hover { transform: translateY(-3px); box-shadow:0 14px 27px rgba(241,20,155,.12); }
+    .yunan-premium-card .product-image-wrapper { aspect-ratio:3/3.55; border-radius:12px; box-shadow:none; }
+    .yunan-premium-card .product-img { object-position: top center; }
+    .yunan-premium-card .product-info { text-align:left; padding:11px 8px 1px; }
+    .yunan-premium-card .product-category { font-size:10px; }
+    .yunan-premium-card .product-title { font-size:13px; font-weight:800; color:#19213a; }
+    .yunan-premium-card .product-price { font-size:17px; }
+    .yunan-premium-card .product-action-overlay {
+        opacity:1; transform:none; padding:12px 6px 9px;
+        background:linear-gradient(to top, rgba(15,4,21,.35), transparent);
+    }
+    .yunan-premium-card .btn-quick-add {
+        background:linear-gradient(120deg,#f1149b,#e90086); color:white;
+        width:94%; max-width:190px; border-radius:11px; font-size:12px;
+        padding:9px 7px; box-shadow:0 6px 15px rgba(241,20,155,.2);
+    }
+    .yunan-premium-card .btn-quick-add:hover { background:#be0878; color:white; }
+    .yunan-search-global {
+        margin-top: 9px; padding:0; border:0; background:transparent;
+        font-size:11px; font-weight:700; color:#e00a88; text-align:left;
+        text-decoration:underline; text-underline-offset:3px;
+    }
+    .yunan-search-hint { display:block; font-size:10px; line-height:1.45; color:#8b8995; margin-top:7px; }
+    /* Colores de textos e iconos de la barra: el logo definitivo requiere _LayoutCliente.cshtml. */
+    header .navbar, nav.navbar, .yunan-navbar, .client-navbar {
+        background:linear-gradient(100deg,#fa169c,#d9007e) !important;
+    }
+    header .navbar-brand, nav.navbar .navbar-brand,
+    header .navbar-brand *, nav.navbar .navbar-brand *,
+    header nav .nav-link:not(.active), nav.navbar .nav-link:not(.active),
+    header .navbar-text, header .navbar-toggler {
+        color:#fff !important;
+    }
+    header .navbar-brand svg, nav.navbar .navbar-brand svg,
+    header .navbar-brand svg *, nav.navbar .navbar-brand svg * { fill: currentColor; }
+    /* Solo logos con transparencia: no invertir fotografías JPEG. */
+    header .navbar-brand img[src$=".png"], nav.navbar .navbar-brand img[src$=".png"] {
+        filter: brightness(0) invert(1);
+    }
+    header .navbar .nav-link:hover, nav.navbar .nav-link:hover { color:#ffe4f2 !important; }
+    @@media (min-width: 1800px) { .yunan-category-card { max-width: 160px; } }
+    @@media (max-width: 1199px) {
+        .yunan-shop { grid-template-columns: 240px minmax(0,1fr); gap:18px; }
+        .yunan-category-card { flex: 0 0 118px; }
+    }
+    @@media (max-width: 991px) {
+        .yunan-shop { grid-template-columns: minmax(0,1fr); }
+        .yunan-sidebar { display:none; }
+        .yunan-sidebar.is-open { display:block; }
+        .yunan-category-card { flex: 0 0 115px; }
+    }
+    @@media (max-width: 575px) {
+        .yunan-banner-section, .yunan-catalog-section { width:calc(100vw - 22px) !important; }
+        .yunan-catalog-section { padding:5px 0 45px !important; }
+        .yunan-style-intro { margin-top: 10px; }
+        .yunan-style-intro h1 { font-size: 28px; }
+        .yunan-category-card { flex: 0 0 103px; min-width:103px; min-height:114px; }
+        .yunan-category-photo { height:73px; flex-basis:73px; }
+        .yunan-results-counter { font-size:10px; padding:5px 8px; }
+        .yunan-premium-card .btn-quick-add { font-size:11px; }
+    }
+
+    /* V3: marca legible y experiencia de filtrado sin recargar la página. */
+    .yunan-brand-white {
+        display:inline-flex !important;
+        flex-direction:column !important;
+        align-items:center !important;
+        justify-content:center !important;
+        gap:0 !important;
+        min-width:116px;
+        text-align:center;
+        line-height:1.05;
+        color:#fff !important;
+        text-decoration:none !important;
+        opacity:1 !important;
+        visibility:visible !important;
+        filter:none !important;
+    }
+    .yunan-brand-white .yunan-logo-crown {
+        display:block; font-size:17px; line-height:.85;
+        color:#fff !important; opacity:1 !important;
+    }
+    .yunan-brand-white .yunan-logo-name {
+        display:block; font:bold 28px/1.12 Georgia,'Times New Roman',serif;
+        letter-spacing:1px; color:#fff !important; opacity:1 !important;
+    }
+    .yunan-brand-white .yunan-logo-tagline {
+        display:block; font:600 10px/1.15 Arial,sans-serif;
+        letter-spacing:.3px; color:#fff !important; opacity:1 !important;
+    }
+    .yunan-brand-white:hover, .yunan-brand-white:hover * { color:#fff !important; }
+    .yunan-results-region { transition:opacity .15s ease; }
+    .yunan-results-region.is-loading {opacity:.58; pointer-events:none;}
+    .yunan-category-strip.is-loading {pointer-events:none;}
+    @@media (prefers-reduced-motion:reduce) {
+        .yunan-results-region {transition:none;}
+    }
+</style>
+
+<!-- Carrusel principal -->
+
+<section class="yunan-banner-section">
+    <div id="yunanCarousel"
+         class="carousel slide carousel-fade yunan-carousel"
+         data-bs-ride="carousel"
+         data-bs-interval="5000"
+         data-bs-pause="hover"
+         data-bs-touch="true">
+
+        <div class="carousel-indicators">
+            <button type="button"
+                    data-bs-target="#yunanCarousel"
+                    data-bs-slide-to="0"
+                    class="active"
+                    aria-current="true"
+                    aria-label="Banner 1"></button>
+
+            <button type="button"
+                    data-bs-target="#yunanCarousel"
+                    data-bs-slide-to="1"
+                    aria-label="Banner 2"></button>
+
+            <button type="button"
+                    data-bs-target="#yunanCarousel"
+                    data-bs-slide-to="2"
+                    aria-label="Banner 3"></button>
+        </div>
+
+        <div class="carousel-inner">
+            <div class="carousel-item active">
+                <img src="~/img/banner-yunan-01.png"
+                     asp-append-version="true"
+                     class="d-block w-100"
+                     alt="YUNAN - Brilla Bonito" />
+            </div>
+
+            <div class="carousel-item">
+                <img src="~/img/banner-yunan-02.png"
+                     asp-append-version="true"
+                     class="d-block w-100"
+                     alt="YUNAN - Descubre tu estilo" />
+            </div>
+
+            <div class="carousel-item">
+                <img src="~/img/banner-yunan-03.png"
+                     asp-append-version="true"
+                     class="d-block w-100"
+                     alt="YUNAN - Encuentra tu estilo" />
+            </div>
+        </div>
+
+        <button class="carousel-control-prev"
+                type="button"
+                data-bs-target="#yunanCarousel"
+                data-bs-slide="prev">
+            <span class="carousel-control-prev-icon"
+                  aria-hidden="true"></span>
+            <span class="visually-hidden">Anterior</span>
+        </button>
+
+        <button class="carousel-control-next"
+                type="button"
+                data-bs-target="#yunanCarousel"
+                data-bs-slide="next">
+            <span class="carousel-control-next-icon"
+                  aria-hidden="true"></span>
+            <span class="visually-hidden">Siguiente</span>
+        </button>
+    </div>
+</section>
+
+<!-- Encabezado de colección -->
+
+<div class="yunan-catalog-section"
+     id="coleccion">
+
+    <!-- Botón de filtros para celulares -->
+
+    <div class="d-lg-none mb-3">
+        <button type="button"
+                class="yunan-mobile-filters"
+                id="toggleYunanFilters"
+                aria-expanded="false"
+                aria-controls="yunanSidebar">
+            <i class="bi bi-sliders"></i>
+            Mostrar filtros
+        </button>
+    </div>
+
+    <div class="yunan-shop">
+
+        <!-- Panel lateral de filtros -->
+
+        <aside class="yunan-sidebar" id="yunanSidebar">
+
+            <div class="yunan-sidebar-heading">
+                <h3>
+                    <i class="bi bi-sliders"></i>
+                    Filtros
+                </h3>
+
+                <a asp-action="Index"
+                           asp-fragment="productos"
+                   class="yunan-clear-filters">
+                    Limpiar todo
+                </a>
+            </div>
+
+            <form asp-action="Index"
+                  asp-fragment="productos"
+                  method="get"
+                  autocomplete="off"
+                  id="formFiltros">
+
+                <!-- Buscar productos -->
+
+                <div class="yunan-filter-group">
+                    <label class="yunan-filter-label"
+                           for="busqueda">
+                        <i class="bi bi-search"></i>
+                        Buscar
+                    </label>
+
+                    <div class="yunan-search-box">
+                        <input type="text"
+                               id="busqueda"
+                               name="busqueda"
+                               maxlength="100"
+                               class="yunan-filter-control"
+                               placeholder="¿Qué buscas hoy?"
+                               value="@Model.Busqueda" />
+
+                        <i class="bi bi-search"></i>
+                    </div>
+                    <button type="button" id="buscarEnTodoYunan" class="yunan-search-global">
+                        <i class="bi bi-search"></i> Buscar en todo el catálogo
+                    </button>
+                    <small class="yunan-search-hint">Los filtros se combinan. Usa esta opción para buscar sin categoría, talla, color ni precio.</small>
+                </div>
+
+                <!-- Categorías -->
+
+                <div class="yunan-filter-group">
+                    <label class="yunan-filter-label"
+                           for="categoriaId">
+                        <i class="bi bi-grid"></i>
+                        Categoría
+                    </label>
+
+                    <select id="categoriaId"
+                            name="categoriaId"
+                            class="yunan-filter-control">
+
+                        <option value="">Todas las categorías</option>
+
+                        @foreach (var cat in Model.Categorias)
+                        {
+                            <option value="@cat.Value"
+                                    selected="@(categoriaActual == cat.Value)">
+                                @cat.Text
+                            </option>
+                        }
+                    </select>
+                </div>
+
+                <!-- Tallas -->
+
+                <div class="yunan-filter-group">
+                    <label class="yunan-filter-label"
+                           for="talla">
+                        <i class="bi bi-rulers"></i>
+                        Talla
+                    </label>
+
+                    <select id="talla"
+                            name="talla"
+                            class="yunan-filter-control">
+
+                        <option value="">Todas las tallas</option>
+
+                        @foreach (var t in Model.Tallas)
+                        {
+                            <option value="@t.Value"
+                                    selected="@(Model.Talla == t.Value)">
+                                @t.Text
+                            </option>
+                        }
+                    </select>
+                </div>
+
+                <!-- Colores -->
+
+                <div class="yunan-filter-group">
+                    <label class="yunan-filter-label"
+                           for="color">
+                        <i class="bi bi-palette"></i>
+                        Color
+                    </label>
+
+                    <select id="color"
+                            name="color"
+                            class="yunan-filter-control">
+
+                        <option value="">Todos los colores</option>
+
+                        @foreach (var c in Model.Colores)
+                        {
+                            <option value="@c.Value"
+                                    selected="@(Model.Color == c.Value)">
+                                @c.Text
+                            </option>
+                        }
+                    </select>
+                </div>
+
+                <!-- Precios -->
+
+                <div class="yunan-filter-group">
+                    <label class="yunan-filter-label">
+                        <i class="bi bi-tag"></i>
+                        Rango de precio
+                    </label>
+
+                    <div class="yunan-price-fields">
+                        <input type="number"
+                               name="precioMin"
+                               id="precioMin"
+                               class="yunan-filter-control"
+                               placeholder="Mín."
+                               value="@Model.PrecioMin"
+                               min="0"
+                               step="0.01"
+                               aria-label="Precio mínimo" />
+
+                        <span class="yunan-price-separator">–</span>
+
+                        <input type="number"
+                               name="precioMax"
+                               id="precioMax"
+                               class="yunan-filter-control"
+                               placeholder="Máx."
+                               value="@Model.PrecioMax"
+                               min="0"
+                               step="0.01"
+                               aria-label="Precio máximo" />
+                    </div>
+
+                    <div class="yunan-filter-hint">
+                        Precios expresados en soles (S/)
+                    </div>
+                </div>
+
+                <!-- Aplicar filtros -->
+
+                <button type="submit"
+                        class="yunan-apply-button">
+                    <i class="bi bi-funnel me-2"></i>
+                    Aplicar filtros
+                    <i class="bi bi-arrow-right ms-2"></i>
+                </button>
+
+            </form>
+
+            <div class="yunan-sidebar-footer">
+                <i class="bi bi-heart-fill"
+                   style="color:#f1149b"></i>
+                Encuentra tu estilo en YUNAN
+            </div>
+
+        </aside>
+
+        <!-- Contenido principal del catálogo -->
+
+        <main class="yunan-shop-main">
+
+            <div class="yunan-style-intro">
+                <h1>Descubre <span>tu estilo</span></h1>
+                <p>Encuentra prendas que combinen contigo, para cada momento.</p>
+            </div>
+
+            <!-- Categorías rápidas -->
+
+            <section class="yunan-category-section">
+
+                <div class="yunan-category-header">
+                    <h3>
+                        <i class="bi bi-grid-3x3-gap"></i>
+                        Explora por categoría
+                    </h3>
+
+                    <a class="yunan-category-hint" asp-action="Index" asp-fragment="productos">Ver todas <i class="bi bi-arrow-right"></i></a>
+                </div>
+
+                <div class="yunan-category-strip" aria-label="Categorías disponibles">
+                    <!-- Todas: no depende de un registro en la BD -->
+                    <a asp-action="Index"
+                       asp-fragment="productos"
+                       class="yunan-category-card @(!categoriaSeleccionada ? "active" : "")">
+                        <span class="yunan-category-icon"><i class="bi bi-grid" aria-hidden="true"></i></span>
+                        <span class="yunan-category-name">Todas</span>
+                    </a>
+
+                    @* Tarjetas de navegación: solo se activan si esa categoría realmente existe.
+                       La categoría detallada de la BD sigue estando disponible en el filtro lateral. *@
+                    @foreach (var categoria in categoriasVisuales)
+                    {
+                        var catEncontrada = Model.Categorias
+                            .Where(c => categoria.Claves.Any(p =>
+                                c.Text != null && c.Text.IndexOf(p, StringComparison.OrdinalIgnoreCase) >= 0))
+                            .OrderBy(c => string.Equals(c.Text, categoria.Nombre, StringComparison.OrdinalIgnoreCase) ? 0 : 1)
+                            .FirstOrDefault();
+
+
+                        var disponible = catEncontrada != null;
+                        var seleccionada = disponible && categoriaActual == catEncontrada.Value;
+                        if (disponible)
+                        {
+                            <a asp-action="Index"
+                               asp-fragment="productos"
+                               asp-route-categoriaId="@catEncontrada.Value"
+                               class="yunan-category-card @(seleccionada ? "active" : "")"
+                               title="Ver @categoria.Nombre">
+                                <span class="yunan-category-icon yunan-category-photo">
+                                    <img src="~/img/Categorias/@categoria.Imagen" asp-append-version="true"
+                                         alt="@categoria.Nombre" loading="lazy" />
+                                </span>
+                                <span class="yunan-category-name">@categoria.Nombre</span>
+                            </a>
+                        }
+                        else
+                        {
+                            <div class="yunan-category-card is-disabled" aria-disabled="true"
+                                 title="Aún no hay una categoría de @categoria.Nombre registrada">
+                                <span class="yunan-category-icon yunan-category-photo">
+                                    <img src="~/img/Categorias/@categoria.Imagen" asp-append-version="true"
+                                         alt="@categoria.Nombre" loading="lazy" />
+                                </span>
+                                <span class="yunan-category-name">@categoria.Nombre</span>
+                            </div>
+                        }
+                    }
+                </div>
+
+            </section>
+
+            <div id="yunanAjaxEstado" class="visually-hidden" role="status" aria-live="polite"></div>
+            <div id="yunanResultadosDinamicos" class="yunan-results-region" aria-busy="false">
+
+            <!-- Encabezado compacto, sin repetir "Nuestra colección" -->
+            <div class="yunan-results-header" id="productos">
+                <div>
+                    <h3 class="yunan-results-title">Prendas para ti</h3>
+                    <p class="yunan-results-subtitle">Explora las opciones disponibles en YUNAN</p>
+                </div>
+                <span class="yunan-results-counter">@Model.Productos.Count() en esta página</span>
+            </div>
+
+            <!-- Listado de productos -->
+
+            <div class="row g-3 g-xl-4 yunan-products-grid">
+
+                @if (!Model.Productos.Any())
+                {
+                    <div class="col-12 text-center py-5">
+
+                        <div class="mb-3">
+                            <i class="bi bi-emoji-frown"
+                               style="font-size:4rem;color:#ddd">
+                            </i>
+                        </div>
+
+                        <h4 class="text-muted">
+                            No hay coincidencias con la combinación de filtros aplicada.
+                        </h4>
+                        <p class="text-muted small">Prueba sin filtros de talla, categoría, color o precio, o revisa el nombre del producto.</p>
+
+                        <a asp-action="Index"
+                           asp-fragment="productos"
+                           class="btn btn-outline-dark mt-3 rounded-pill px-4">
+                            Quitar filtros y ver todo
+                        </a>
+
+                    </div>
+                }
+
+                @foreach (var cProducto in Model.Productos)
+                {
+                    <div class="col-6 col-md-4 col-xl-3">
+
+                        <div class="product-card h-100 yunan-premium-card">
+
+                            <div class="product-image-wrapper">
+
+                                <img src="@cProducto.ImagenUrl"
+                                     asp-append-version="true"
+                                     class="product-img"
+                                     onerror="this.onerror=null;this.src='/img/Img_Productos/default.jpg';"
+                                     alt="@cProducto.Nombre" />
+
+                                @{
+                                    var stockVariantes = cProducto.Variantes
+                                        .Where(v => v.Estado)
+                                        .Sum(v => v.StockActual);
+                                }
+
+                                <!-- Botón comprar -->
+
+                                <div class="product-action-overlay">
+
+                                    @if (stockVariantes > 0)
+                                    {
+                                        <button type="button"
+                                                class="btn-quick-add js-abrir-modal-producto"
+                                                data-producto-id="@cProducto.IdProducto"
+                                                data-producto-nombre="@cProducto.Nombre"
+                                                data-producto-imagen="@cProducto.ImagenUrl"
+                                                data-producto-precio="@cProducto.PrecioVenta.ToString("F2")"
+                                                data-producto-stock="@stockVariantes">
+
+                                            <i class="bi bi-bag-plus-fill me-1"></i>
+                                            Comprar
+                                        </button>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-dark">
+                                            Agotado
+                                        </span>
+                                    }
+
+                                </div>
+
+                                <!-- Indicador de stock -->
+
+                                <div class="position-absolute top-0 start-0 m-2">
+
+                                    @if (stockVariantes < 5 && stockVariantes > 0)
+                                    {
+                                        <span class="badge bg-warning text-dark shadow-sm">
+                                            ¡Últimos!
+                                        </span>
+                                    }
+
+                                </div>
+
+                            </div>
+
+                            <!-- Información del producto -->
+
+                            <div class="product-info">
+
+                                <div class="product-category">
+                                    @cProducto.Categoria.Nombre
+                                </div>
+
+                                <h5 class="product-title"
+                                    title="@cProducto.Nombre">
+                                    @cProducto.Nombre
+                                </h5>
+
+                                <div class="product-price">
+                                    S/ @cProducto.PrecioVenta.ToString("F2")
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+                }
+
+            </div>
+
+            <!-- Paginación -->
+
+            @if (Model.TotalPaginas > 1)
+            {
+                <div class="d-flex flex-column align-items-center mt-5">
+
+                    <nav aria-label="Paginación del catálogo">
+                        <ul class="pagination">
+
+                            <li class="page-item @(Model.TienePaginaAnterior ? "" : "disabled")">
+
+                                <a class="page-link"
+                                   asp-action="Index"
+                                   asp-fragment="productos"
+                                   asp-route-pagina="@(Model.PaginaActual - 1)"
+                                   asp-route-categoriaId="@Model.CategoriaId"
+                                   asp-route-talla="@Model.Talla"
+                                   asp-route-color="@Model.Color"
+                                   asp-route-precioMin="@Model.PrecioMin"
+                                   asp-route-precioMax="@Model.PrecioMax"
+                                   asp-route-busqueda="@Model.Busqueda">
+
+                                    <i class="bi bi-chevron-left"></i>
+                                </a>
+                            </li>
+
+                            @{
+                                int inicio = Math.Max(1, Model.PaginaActual - 2);
+                                int fin = Math.Min(
+                                    Model.TotalPaginas,
+                                    Model.PaginaActual + 2
+                                );
+
+                                if (inicio > 1)
+                                {
+                                    <li class="page-item">
+                                        <a class="page-link"
+                                           asp-action="Index"
+                                   asp-fragment="productos"
+                                           asp-route-pagina="1"
+                                           asp-route-categoriaId="@Model.CategoriaId"
+                                           asp-route-talla="@Model.Talla"
+                                           asp-route-color="@Model.Color"
+                                           asp-route-precioMin="@Model.PrecioMin"
+                                           asp-route-precioMax="@Model.PrecioMax"
+                                           asp-route-busqueda="@Model.Busqueda">
+                                            1
+                                        </a>
+                                    </li>
+
+                                    if (inicio > 2)
+                                    {
+                                        <li class="page-item disabled">
+                                            <span class="page-link">...</span>
+                                        </li>
+                                    }
+                                }
+
+                                for (int i = inicio; i <= fin; i++)
+                                {
+                                    <li class="page-item @(i == Model.PaginaActual ? "active" : "")">
+
+                                        <a class="page-link"
+                                           asp-action="Index"
+                                   asp-fragment="productos"
+                                           asp-route-pagina="@i"
+                                           asp-route-categoriaId="@Model.CategoriaId"
+                                           asp-route-talla="@Model.Talla"
+                                           asp-route-color="@Model.Color"
+                                           asp-route-precioMin="@Model.PrecioMin"
+                                           asp-route-precioMax="@Model.PrecioMax"
+                                           asp-route-busqueda="@Model.Busqueda">
+                                            @i
+                                        </a>
+                                    </li>
+                                }
+
+                                if (fin < Model.TotalPaginas)
+                                {
+                                    if (fin < Model.TotalPaginas - 1)
+                                    {
+                                        <li class="page-item disabled">
+                                            <span class="page-link">...</span>
+                                        </li>
+                                    }
+
+                                    <li class="page-item">
+                                        <a class="page-link"
+                                           asp-action="Index"
+                                   asp-fragment="productos"
+                                           asp-route-pagina="@Model.TotalPaginas"
+                                           asp-route-categoriaId="@Model.CategoriaId"
+                                           asp-route-talla="@Model.Talla"
+                                           asp-route-color="@Model.Color"
+                                           asp-route-precioMin="@Model.PrecioMin"
+                                           asp-route-precioMax="@Model.PrecioMax"
+                                           asp-route-busqueda="@Model.Busqueda">
+                                            @Model.TotalPaginas
+                                        </a>
+                                    </li>
+                                }
+                            }
+
+                            <li class="page-item @(Model.TienePaginaSiguiente ? "" : "disabled")">
+
+                                <a class="page-link"
+                                   asp-action="Index"
+                                   asp-fragment="productos"
+                                   asp-route-pagina="@(Model.PaginaActual + 1)"
+                                   asp-route-categoriaId="@Model.CategoriaId"
+                                   asp-route-talla="@Model.Talla"
+                                   asp-route-color="@Model.Color"
+                                   asp-route-precioMin="@Model.PrecioMin"
+                                   asp-route-precioMax="@Model.PrecioMax"
+                                   asp-route-busqueda="@Model.Busqueda">
+
+                                    <i class="bi bi-chevron-right"></i>
+                                </a>
+                            </li>
+
+                        </ul>
+                    </nav>
+
+                </div>
+            }
+
+            </div><!-- /#yunanResultadosDinamicos -->
+        </main>
+
+    </div>
+
+</div>
+
+<!-- Modal de selección de producto -->
+
+<div class="modal fade"
+     id="modalSeleccionProducto"
+     tabindex="-1"
+     aria-hidden="true">
+
+    <div class="modal-dialog modal-dialog-centered">
+
+        <div class="modal-content border-0 shadow-lg"
+             style="border-radius:20px">
+
+            <div class="modal-header border-0 pb-0">
+
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal"
+                        aria-label="Cerrar">
+                </button>
+
+            </div>
+
+            <div class="modal-body pt-0 px-4 pb-4">
+
+                <div class="text-center mb-4">
+
+                    <h5 id="modal-producto-nombre"
+                        class="fw-bold mb-1"></h5>
+
+                    <h3 class="fw-bold"
+                        style="color:#f1149b">
+                        S/ <span id="modal-producto-precio"></span>
+                    </h3>
+
+                    <span class="badge bg-light text-dark border">
+                        Stock:
+                        <span id="modal-producto-stock"></span>
+                    </span>
+
+                </div>
+
+                <div class="d-flex flex-column gap-3">
+
+                    <!-- Tallas -->
+
+                    <div>
+                        <label class="small fw-bold text-muted text-uppercase mb-2">
+                            Selecciona Talla
+                        </label>
+
+                        <div id="modal-tallas-container"
+                             class="d-flex flex-wrap gap-2 justify-content-center">
+                        </div>
+
+                        <div class="text-danger small text-center mt-1 d-none"
+                             id="error-talla">
+                            Selecciona una talla
+                        </div>
+                    </div>
+
+                    <!-- Colores -->
+
+                    <div>
+                        <label class="small fw-bold text-muted text-uppercase mb-2">
+                            Selecciona Color
+                        </label>
+
+                        <div id="modal-colores-container"
+                             class="d-flex flex-wrap gap-2 justify-content-center">
+                        </div>
+
+                        <div class="text-danger small text-center mt-1 d-none"
+                             id="error-color">
+                            Selecciona un color
+                        </div>
+                    </div>
+
+                    <!-- Cantidad -->
+
+                    <div class="d-flex justify-content-center mt-2">
+
+                        <div class="input-group" style="width:140px">
+
+                            <button class="btn btn-outline-secondary"
+                                    type="button"
+                                    id="btn-decrementar">
+                                -
+                            </button>
+
+                            <input type="text"
+                                   class="form-control text-center border-secondary border-opacity-25"
+                                   id="modal-cantidad"
+                                   value="1"
+                                   readonly />
+
+                            <button class="btn btn-outline-secondary"
+                                    type="button"
+                                    id="btn-incrementar">
+                                +
+                            </button>
+
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Agregar al carrito -->
+
+                <button type="button"
+                        class="btn w-100 mt-4 py-3 rounded-pill fw-bold text-white shadow-sm"
+                        style="background-color:#f1149b"
+                        id="btn-confirmar-agregar">
+
+                    AGREGAR AL CARRITO
+
+                </button>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+
+    <script src="~/js/validaciones.js"></script>
+
+    <script>
+        $(document).ready(function () {
+
+            // Si el layout muestra el logo como imagen oscura o texto rosa,
+            // convertir SOLO su enlace de marca a letras blancas. No tocar sesión/carrito.
+            (function repararLogoVisible() {
+                const enlaces = Array.from(document.querySelectorAll('header a, nav a'));
+                const enlaceMarca = enlaces.find(a => a.querySelector('img[src*="logo_empresa"], img[src*="logo-"]'))
+                    || enlaces.find(a => a.classList.contains('navbar-brand'))
+                    || enlaces.find(a => /YUNAN|Brilla Bonito/i.test(a.textContent || '')
+                        && !a.classList.contains('nav-link'));
+                if (!enlaceMarca || enlaceMarca.classList.contains('yunan-brand-white')) return;
+                enlaceMarca.classList.add('yunan-brand-white');
+                enlaceMarca.setAttribute('aria-label', 'YUNAN - Brilla Bonito');
+                // Mantener el href y las rutas originales del enlace.
+                enlaceMarca.replaceChildren();
+                const corona = document.createElement('span');
+                corona.className = 'yunan-logo-crown';
+                corona.textContent = '♛';
+                corona.setAttribute('aria-hidden', 'true');
+                const nombre = document.createElement('span');
+                nombre.className = 'yunan-logo-name';
+                nombre.textContent = 'YUNAN';
+                const lema = document.createElement('span');
+                lema.className = 'yunan-logo-tagline';
+                lema.textContent = '— Brilla Bonito —';
+                enlaceMarca.append(corona, nombre, lema);
+            })();
+
+            // Actualización AJAX del catálogo. Se consulta al controlador Index actual
+            // y se sustituye ÚNICAMENTE el listado, paginación y tarjetas de categorías.
+            // No vuelve a cargar el layout, banner ni modal del carrito.
+            let peticionCatalogo = null;
+            let ultimaPeticion = 0;
+            if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+
+            async function actualizarYunanSinRecarga(direccion, guardarHistorial) {
+                const destino = new URL(direccion, window.location.href);
+                if (destino.origin !== window.location.origin) return;
+                destino.hash = ''; // No generar salto automático a #productos.
+                const numeroPeticion = ++ultimaPeticion;
+                const posicionVertical = window.scrollY;
+                const anteriorCategorias = document.querySelector('#coleccion .yunan-category-strip');
+                const anteriorResultados = document.getElementById('yunanResultadosDinamicos');
+                const estado = document.getElementById('yunanAjaxEstado');
+                const posicionCategorias = anteriorCategorias ? anteriorCategorias.scrollLeft : 0;
+
+                if (peticionCatalogo) peticionCatalogo.abort();
+                peticionCatalogo = new AbortController();
+                if (anteriorResultados) {
+                    anteriorResultados.classList.add('is-loading');
+                    anteriorResultados.setAttribute('aria-busy', 'true');
+                }
+                if (anteriorCategorias) anteriorCategorias.classList.add('is-loading');
+                if (estado) estado.textContent = 'Actualizando productos...';
+
+                try {
+                    const respuesta = await fetch(destino.pathname + destino.search, {
+                        method: 'GET', credentials: 'same-origin',
+                        headers: { 'Accept': 'text/html' },
+                        signal: peticionCatalogo.signal
+                    });
+                    if (!respuesta.ok) throw new Error('No se pudo consultar el catálogo.');
+                    const html = await respuesta.text();
+                    if (numeroPeticion !== ultimaPeticion) return;
+                    const paginaNueva = new DOMParser().parseFromString(html, 'text/html');
+                    const nuevosResultados = paginaNueva.querySelector('#yunanResultadosDinamicos');
+                    const nuevasCategorias = paginaNueva.querySelector('#coleccion .yunan-category-strip');
+                    if (!nuevosResultados || !nuevasCategorias) {
+                        throw new Error('El servidor devolvió una página inesperada.');
+                    }
+                    const resultadosActuales = document.getElementById('yunanResultadosDinamicos');
+                    const categoriasActuales = document.querySelector('#coleccion .yunan-category-strip');
+                    resultadosActuales.replaceWith(nuevosResultados);
+                    categoriasActuales.replaceWith(nuevasCategorias);
+                    nuevasCategorias.scrollLeft = posicionCategorias;
+
+                    // Sincronizar controles del filtro con los datos que devolvió el servidor.
+                    for (const id of ['busqueda', 'categoriaId', 'talla', 'color', 'precioMin', 'precioMax']) {
+                        const actual = document.getElementById(id);
+                        const nuevo = paginaNueva.getElementById(id);
+                        if (actual && nuevo) actual.value = nuevo.value;
+                    }
+
+                    if (guardarHistorial) history.pushState({ yunanCatalogo: true }, '', destino.pathname + destino.search);
+                    if (estado) estado.textContent = 'Productos actualizados.';
+                    // No scrollIntoView, no recarga y no salto al principio.
+                    requestAnimationFrame(() => window.scrollTo(0, posicionVertical));
+                } catch (error) {
+                    if (error.name === 'AbortError' || numeroPeticion !== ultimaPeticion) return;
+                    if (estado) estado.textContent = 'No se pudo actualizar el catálogo.';
+                    if (typeof showToast === 'function') showToast('No se pudo actualizar. Inténtalo de nuevo.', 'error');
+                    else console.error('YUNAN:', error);
+                } finally {
+                    if (numeroPeticion === ultimaPeticion) {
+                        document.getElementById('yunanResultadosDinamicos')?.classList.remove('is-loading');
+                        document.getElementById('yunanResultadosDinamicos')?.setAttribute('aria-busy', 'false');
+                        document.querySelector('#coleccion .yunan-category-strip')?.classList.remove('is-loading');
+                    }
+                }
+            }
+
+            // Categorías, paginación, quitar filtros: todos actualizan sin recargar.
+            document.getElementById('coleccion')?.addEventListener('click', function (evento) {
+                const enlace = evento.target.closest(
+                    'a.yunan-category-card[href], a.yunan-category-hint[href], ' +
+                    'a.yunan-clear-filters[href], .pagination a.page-link[href], ' +
+                    '#yunanResultadosDinamicos a[href]'
+                );
+                if (!enlace || !this.contains(enlace)) return;
+                if (evento.defaultPrevented || evento.button !== 0 || evento.ctrlKey || evento.metaKey || evento.shiftKey || evento.altKey) return;
+                if (enlace.origin !== location.origin || enlace.hasAttribute('download')) return;
+                evento.preventDefault();
+                actualizarYunanSinRecarga(enlace.href, true);
+            });
+
+            // Volver/Avanzar también conserva la navegación fluida.
+            window.addEventListener('popstate', function () {
+                actualizarYunanSinRecarga(window.location.href, false);
+            });
+
+
+            // Al elegir una categoría en el desplegable, actualizar automáticamente
+            // el listado, sin obligar a pulsar Aplicar ni recargar la página.
+            $('#categoriaId').on('change', function () {
+                $('#formFiltros').trigger('submit');
+            });
+
+            // Búsqueda global: restablece restricciones que ocultarían un producto existente.
+            $('#buscarEnTodoYunan').on('click', function () {
+                $('#categoriaId, #talla, #color, #precioMin, #precioMax').val('');
+                $('#formFiltros').trigger('submit');
+            });
+
+            // Tooltips
+
+            var tooltipTriggerList = [].slice.call(
+                document.querySelectorAll('[data-bs-toggle="tooltip"]')
+            );
+
+            tooltipTriggerList.forEach(function (elemento) {
+                new bootstrap.Tooltip(elemento);
+            });
+
+            // Mostrar y ocultar filtros en celulares
+
+            $('#toggleYunanFilters').on('click', function () {
+
+                const sidebar = $('#yunanSidebar');
+
+                sidebar.toggleClass('is-open');
+
+                const abierto = sidebar.hasClass('is-open');
+
+                $(this).attr('aria-expanded', String(abierto));
+
+                $(this).html(
+                    abierto
+                        ? '<i class="bi bi-x-lg"></i> Ocultar filtros'
+                        : '<i class="bi bi-sliders"></i> Mostrar filtros'
+                );
+
+                if (abierto) {
+                    sidebar[0].scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+
+            // Búsqueda: no eliminar letras con tilde, ñ ni signos que puedan formar
+            // parte del nombre real de un producto. El servidor validará la consulta.
+            $('#busqueda').on('input', function () {
+                if (this.value.startsWith(' ')) this.value = this.value.trimStart();
+            });
+
+            // Validar rango de precios
+
+            $('#formFiltros').on('submit', function (e) {
+
+                const precioMin = $('#precioMin').val();
+                const precioMax = $('#precioMax').val();
+
+                const precioMinVal = parseFloat(precioMin) || 0;
+                const precioMaxVal = parseFloat(precioMax) || 0;
+
+                if (precioMin && !precioMax) {
+
+                    e.preventDefault();
+
+                    showToast(
+                        'Si ingresa un precio mínimo, debe ingresar también un precio máximo',
+                        'error'
+                    );
+
+                    $('#precioMax').addClass('is-invalid').focus();
+
+                    return false;
+                }
+
+                if (precioMax && !precioMin) {
+
+                    e.preventDefault();
+
+                    showToast(
+                        'Si ingresa un precio máximo, debe ingresar también un precio mínimo',
+                        'error'
+                    );
+
+                    $('#precioMin').addClass('is-invalid').focus();
+
+                    return false;
+                }
+
+                if (precioMin && precioMax) {
+
+                    if (precioMinVal >= precioMaxVal) {
+
+                        e.preventDefault();
+
+                        showToast(
+                            'El precio mínimo debe ser menor que el precio máximo',
+                            'error'
+                        );
+
+                        $('#precioMin, #precioMax').addClass('is-invalid');
+
+                        return false;
+                    }
+                }
+
+                if (precioMinVal < 0 || precioMaxVal < 0) {
+
+                    e.preventDefault();
+
+                    showToast(
+                        'Los precios no pueden ser negativos',
+                        'error'
+                    );
+
+                    return false;
+                }
+
+                $('#precioMin, #precioMax').removeClass('is-invalid');
+
+                // GET asíncrono: no abandonar la página ni saltar al encabezado.
+                e.preventDefault();
+                const destino = new URL(this.action, window.location.href);
+                const parametros = new URLSearchParams();
+                for (const [clave, valor] of new FormData(this)) {
+                    if (typeof valor === 'string' && valor.trim()) parametros.append(clave, valor.trim());
+                }
+                destino.search = parametros.toString();
+                destino.hash = '';
+                actualizarYunanSinRecarga(destino.href, true);
+            });
+
+            $('#precioMin, #precioMax').on('input', function () {
+                $(this).removeClass('is-invalid');
+            });
+
+            // Variables del producto
+
+            let productoSeleccionado = {};
+            let tallaSeleccionada = null;
+            let colorSeleccionado = null;
+
+            const modal = new bootstrap.Modal(
+                document.getElementById('modalSeleccionProducto')
+            );
+
+            // Abrir modal de producto
+
+            $(document).on('click', '.js-abrir-modal-producto', function (e) {
+
+                e.preventDefault();
+
+                const btn = $(this);
+                const productoId = btn.data('producto-id');
+
+                productoSeleccionado = {
+                    id: productoId,
+                    nombre: btn.data('producto-nombre'),
+                    imagen: btn.data('producto-imagen'),
+                    precio: btn.data('producto-precio'),
+                    stock: btn.data('producto-stock'),
+                    variantes: []
+                };
+
+                tallaSeleccionada = null;
+                colorSeleccionado = null;
+
+                $('#modal-cantidad').val(1);
+
+                $('#error-talla, #error-color').addClass('d-none');
+
+                $('#modal-tallas-container, #modal-colores-container').empty();
+
+                $('#modal-producto-nombre').text(
+                    productoSeleccionado.nombre
+                );
+
+                $('#modal-producto-imagen').attr(
+                    'src',
+                    productoSeleccionado.imagen
+                );
+
+                $('#modal-producto-precio').text(
+                    productoSeleccionado.precio
+                );
+
+                $('#modal-producto-stock').text(
+                    productoSeleccionado.stock
+                );
+
+                // Obtener variantes del producto
+
+                $.get(
+                    '/ClientePanel/ObtenerOpcionesProducto',
+                    { productoId: productoId },
+                    function (res) {
+
+                        if (res.success) {
+
+                            productoSeleccionado.variantes = res.variantes;
+
+                            res.tallas.forEach(t => {
+
+                                $('#modal-tallas-container').append(
+                                    $('<button>', {
+                                        type: 'button',
+                                        class: 'btn btn-outline-dark rounded-circle btn-talla',
+                                        text: t
+                                    })
+                                    .css({
+                                        width: '40px',
+                                        height: '40px'
+                                    })
+                                    .attr('data-talla', t)
+                                );
+                            });
+
+                            res.colores.forEach(c => {
+
+                                $('#modal-colores-container').append(
+                                    $('<button>', {
+                                        type: 'button',
+                                        class: 'btn btn-outline-dark btn-color rounded-pill px-3',
+                                        text: c
+                                    }).attr('data-color', c)
+                                );
+                            });
+
+                            modal.show();
+
+                        } else {
+
+                            showToast(
+                                res.message || 'Error al cargar opciones',
+                                'error'
+                            );
+                        }
+                    }
+                ).fail(function () {
+
+                    showToast('Error de conexión', 'error');
+
+                });
+            });
+
+            // Actualizar stock de variante
+
+            function actualizarStockVariante() {
+
+                if (tallaSeleccionada && colorSeleccionado) {
+
+                    const variante = productoSeleccionado.variantes.find(
+                        v =>
+                            v.talla === tallaSeleccionada &&
+                            v.color === colorSeleccionado
+                    );
+
+                    if (variante) {
+
+                        $('#modal-producto-stock').text(
+                            variante.stockActual
+                        );
+
+                        $('#modal-cantidad').attr(
+                            'max',
+                            variante.stockActual
+                        );
+
+                        if (
+                            parseInt($('#modal-cantidad').val()) >
+                            variante.stockActual
+                        ) {
+
+                            $('#modal-cantidad').val(
+                                variante.stockActual > 0 ? 1 : 0
+                            );
+                        }
+
+                    } else {
+
+                        $('#modal-producto-stock').text(
+                            '0 - Combinación no disponible'
+                        );
+                    }
+                }
+            }
+
+            // Seleccionar talla
+
+            $(document).on('click', '.btn-talla', function () {
+
+                $('.btn-talla').removeClass(
+                    'active bg-dark text-white'
+                );
+
+                $(this).addClass(
+                    'active bg-dark text-white'
+                );
+
+                tallaSeleccionada = $(this)
+                    .data('talla')
+                    .toString();
+
+                $('#error-talla').addClass('d-none');
+
+                actualizarStockVariante();
+            });
+
+            // Seleccionar color
+
+            $(document).on('click', '.btn-color', function () {
+
+                $('.btn-color').removeClass(
+                    'active bg-dark text-white'
+                );
+
+                $(this).addClass(
+                    'active bg-dark text-white'
+                );
+
+                colorSeleccionado = $(this)
+                    .data('color')
+                    .toString();
+
+                $('#error-color').addClass('d-none');
+
+                actualizarStockVariante();
+            });
+
+            // Obtener stock actual
+
+            function getStockActual() {
+
+                if (tallaSeleccionada && colorSeleccionado) {
+
+                    const variante = productoSeleccionado.variantes.find(
+                        v =>
+                            v.talla === tallaSeleccionada &&
+                            v.color === colorSeleccionado
+                    );
+
+                    return variante ? variante.stockActual : 0;
+                }
+
+                return productoSeleccionado.stock;
+            }
+
+            // Incrementar cantidad
+
+            $('#btn-incrementar').click(() => {
+
+                let val = parseInt(
+                    $('#modal-cantidad').val()
+                );
+
+                if (val < getStockActual()) {
+
+                    $('#modal-cantidad').val(val + 1);
+                }
+            });
+
+            // Disminuir cantidad
+
+            $('#btn-decrementar').click(() => {
+
+                let val = parseInt(
+                    $('#modal-cantidad').val()
+                );
+
+                if (val > 1) {
+
+                    $('#modal-cantidad').val(val - 1);
+                }
+            });
+
+            // Agregar producto al carrito
+
+            $('#btn-confirmar-agregar').on('click', function () {
+
+                let valido = true;
+
+                if (!tallaSeleccionada) {
+
+                    $('#error-talla').removeClass('d-none');
+                    valido = false;
+                }
+
+                if (!colorSeleccionado) {
+
+                    $('#error-color').removeClass('d-none');
+                    valido = false;
+                }
+
+                if (!valido) return;
+
+                const btn = $(this);
+                const originalText = btn.html();
+
+                btn.prop('disabled', true).html(
+                    '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Agregando...'
+                );
+
+                $.ajax({
+
+                    url: '/ClientePanel/AgregarAlCarrito',
+
+                    type: 'POST',
+
+                    data: {
+                        productoId: productoSeleccionado.id,
+
+                        cantidad: parseInt(
+                            $('#modal-cantidad').val()
+                        ),
+
+                        talla: tallaSeleccionada,
+
+                        color: colorSeleccionado
+                    },
+
+                    success: function (res) {
+
+                        if (res.success) {
+
+                            showToast(
+                                '¡Producto agregado con estilo!',
+                                'success'
+                            );
+
+                            if (res.totalItems) {
+
+                                $('#carritoCount')
+                                    .text(res.totalItems)
+                                    .show()
+                                    .addClass(
+                                        'animate__animated animate__bounceIn'
+                                    );
+                            }
+
+                            modal.hide();
+
+                        } else {
+
+                            showToast(
+                                res.message,
+                                'error'
+                            );
+                        }
+                    },
+
+                    error: function () {
+
+                        showToast(
+                            'Error de conexión',
+                            'error'
+                        );
+                    },
+
+                    complete: function () {
+
+                        btn.prop('disabled', false)
+                           .html(originalText);
+                    }
+                });
+            });
+
+        });
+    </script>
+}

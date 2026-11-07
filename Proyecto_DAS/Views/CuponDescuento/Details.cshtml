@@ -1,0 +1,118 @@
+@model Proyecto_DAS.ViewModels.CuponDescuento.CuponDescuentoViewModel
+
+@{
+    ViewData["Title"] = "Detalles del Cupón";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-header" style="background-color: #f1149b; color: white;">
+                    <h4 class="mb-0"><i class="bi bi-eye"></i> Detalles del Cupón de Descuento</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label text-muted">@Html.DisplayNameFor(model => model.CodigoCupon)</label>
+                            <h5><span class="badge bg-dark">@Model.CodigoCupon</span></h5>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-muted">@Html.DisplayNameFor(model => model.PorcentajeDescuento)</label>
+                            <h5><span class="badge bg-success">@Model.PorcentajeDescuento%</span></h5>
+                        </div>
+                    </div>
+
+                    <hr />
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label text-muted">@Html.DisplayNameFor(model => model.FechaInicio)</label>
+                            <p><i class="bi bi-calendar-check"></i> @Model.FechaInicio.ToString("dd/MM/yyyy")</p>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-muted">@Html.DisplayNameFor(model => model.FechaVencimiento)</label>
+                            <p><i class="bi bi-calendar-x"></i> @Model.FechaVencimiento.ToString("dd/MM/yyyy")</p>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label text-muted">Estado Actual</label>
+                            <p>
+                                @if (Model.EstadoTexto == "Activo")
+                                {
+                                    <span class="badge bg-success fs-6">
+                                        <i class="bi bi-check-circle"></i> Activo
+                                    </span>
+                                }
+                                else if (Model.EstadoTexto == "Vencido")
+                                {
+                                    <span class="badge bg-danger fs-6">
+                                        <i class="bi bi-x-circle"></i> Vencido
+                                    </span>
+                                }
+                                else if (Model.EstadoTexto == "Programado")
+                                {
+                                    <span class="badge bg-info fs-6">
+                                        <i class="bi bi-clock"></i> Programado
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary fs-6">
+                                        <i class="bi bi-dash-circle"></i> Inactivo
+                                    </span>
+                                }
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-muted">Días Restantes</label>
+                            <p>
+                                @if (Model.DiasRestantes > 0)
+                                {
+                                    <strong>@Model.DiasRestantes días</strong>
+                                }
+                                else
+                                {
+                                    <span class="text-danger"><strong>Vencido</strong></span>
+                                }
+                            </p>
+                        </div>
+                    </div>
+
+                    <hr />
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label text-muted">@Html.DisplayNameFor(model => model.FechaCreacion)</label>
+                            <p><i class="bi bi-calendar-plus"></i> @Model.FechaCreacion.ToString("dd/MM/yyyy HH:mm")</p>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-muted">Ventas Realizadas</label>
+                            <p>
+                                <i class="bi bi-cart-check"></i>
+                                <strong>@ViewBag.CantidadVentas venta(s)</strong>
+                            </p>
+                        </div>
+                    </div>
+
+                    @if (ViewBag.CantidadVentas > 0)
+                    {
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle"></i> Este cupón ha sido utilizado en <strong>@ViewBag.CantidadVentas venta(s)</strong>.
+                        </div>
+                    }
+
+                    <hr />
+
+                    <div class="d-flex justify-content-between">
+                        <a asp-action="Index" class="btn btn-secondary">
+                            <i class="bi bi-arrow-left"></i> Volver
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

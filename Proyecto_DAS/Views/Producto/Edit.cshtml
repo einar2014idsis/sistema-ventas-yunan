@@ -1,0 +1,384 @@
+@model Proyecto_DAS.ViewModels.Producto.ProductoEditViewModel
+
+@{
+    ViewData["Title"] = "Editar Producto";
+}
+
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <h1 class="display-4">@ViewData["Title"]</h1>
+            <hr />
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-10 offset-md-1">
+            <div class="card shadow">
+                <div class="card-body">
+                    <form asp-action="Edit" method="post" enctype="multipart/form-data" autocomplete="off" id="formProducto">
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                        <input type="hidden" asp-for="IdProducto" />
+                        <input type="hidden" asp-for="FechaRegistro" />
+                        <input type="hidden" asp-for="ImagenUrl" />
+
+                        <div class="mb-3">
+                            <label asp-for="Nombre" class="form-label"></label>
+                            <input asp-for="Nombre" class="form-control" id="Nombre" />
+                            <span asp-validation-for="Nombre" class="text-danger"></span>
+                            <div id="nombreFeedback"></div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="CategoriaId" class="form-label"></label>
+                                <select asp-for="CategoriaId" class="form-select" asp-items="Model.Categorias">
+                                    <option value="">-- Seleccione una categoria --</option>
+                                </select>
+                                <span asp-validation-for="CategoriaId" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="ProveedorId" class="form-label"></label>
+                                <select asp-for="ProveedorId" class="form-select" asp-items="Model.Proveedores">
+                                    <option value="">-- Seleccione un proveedor --</option>
+                                </select>
+                                <span asp-validation-for="ProveedorId" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Descripcion" class="form-label"></label>
+                            <textarea asp-for="Descripcion" class="form-control" rows="3" id="Descripcion"></textarea>
+                            <div id="descripcionFeedback" style="display: none;"></div>
+                            <span asp-validation-for="Descripcion" class="text-danger"></span>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="PrecioCompra" class="form-label"></label>
+                                <input asp-for="PrecioCompra" class="form-control" type="number" step="0.01" min="1.01" />
+                                <span asp-validation-for="PrecioCompra" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="PrecioVenta" class="form-label"></label>
+                                <input asp-for="PrecioVenta" class="form-control" type="number" step="0.01" min="1.01" />
+                                <span asp-validation-for="PrecioVenta" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="ImagenArchivo" class="form-label"></label>
+                            <input asp-for="ImagenArchivo" class="form-control" type="file" accept=".jpg,.jpeg" id="imagenInput" onchange="previewImage(event)" />
+                            <span asp-validation-for="ImagenArchivo" class="text-danger"></span>
+                            <small class="form-text text-muted">Seleccione una nueva imagen si desea cambiarla (solo .jpg o .jpeg)</small>
+
+                            <div class="mt-3 text-center">
+                                <p class="text-muted"><strong>Imagen actual:</strong></p>
+                                <div style="max-width: 200px; margin: 0 auto; background-color: #f0f0f0; border: 1px solid #dee2e6; border-radius: 0.375rem; overflow: hidden;">
+                                    <img id="imagenPreview" src="@Model.ImagenUrl" alt="Preview"
+                                         asp-append-version="true"
+                                         style="width: 100%; height: 200px; object-fit: contain"
+                                         onerror="this.src='/img/Img_Productos/default.jpg';" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Variantes -->
+                        <div class="card mb-3" style="border: 2px solid #f1149b;">
+                            <div class="card-header" style="background-color: #f1149b; color: white;">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h5 class="mb-0"><i class="bi bi-grid-3x3-gap-fill"></i> Variantes del Producto (Talla x Color)</h5>
+                                    <span class="badge bg-light text-dark">Stock Total: <strong id="stockTotalDisplay">@Model.StockTotal</strong></span>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <p class="text-muted mb-3">
+                                    <i class="bi bi-info-circle"></i> Administre las combinaciones de talla y color disponibles para este producto.
+                                </p>
+
+                                <div class="table-responsive">
+                                    <table class="table table-bordered table-hover" id="tablaVariantes">
+                                        <thead class="table-dark">
+                                            <tr>
+                                                <th style="width: 120px;">Talla</th>
+                                                <th style="width: 150px;">Color</th>
+                                                <th style="width: 120px;">Stock Actual</th>
+                                                <th style="width: 120px;">Stock Minimo</th>
+                                                <th style="width: 80px;">Activo</th>
+                                                <th style="width: 60px;">Quitar</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="variantesBody">
+                                            @if (Model.Variantes != null && Model.Variantes.Any())
+                                            {
+                                                var index = 0;
+                                                foreach (var variante in Model.Variantes)
+                                                {
+                                                    <tr>
+                                                        <td>
+                                                            <input type="hidden" name="Variantes[@index].IdProductoVariante" value="@variante.IdProductoVariante" />
+                                                            <input type="hidden" name="Variantes[@index].Talla" value="@variante.Talla" />
+                                                            <span class="badge bg-secondary fs-6">@variante.Talla</span>
+                                                        </td>
+                                                        <td>
+                                                            <input type="hidden" name="Variantes[@index].Color" value="@variante.Color" />
+                                                            <span>@variante.Color</span>
+                                                        </td>
+                                                        <td>
+                                                            <input type="number" name="Variantes[@index].StockActual" class="form-control form-control-sm stock-input" value="@variante.StockActual" min="0" required onchange="actualizarStockTotal()" />
+                                                        </td>
+                                                        <td>
+                                                            <input type="number" name="Variantes[@index].StockMinimo" class="form-control form-control-sm" value="@variante.StockMinimo" min="0" required />
+                                                        </td>
+                                                        <td class="text-center">
+                                                            <input type="checkbox" name="Variantes[@index].Estado" value="true" class="form-check-input estado-checkbox" @(variante.Estado ? "checked" : "") onchange="actualizarStockTotal()" />
+                                                            <input type="hidden" name="Variantes[@index].Estado" value="false" class="estado-hidden" />
+                                                        </td>
+                                                        <td class="text-center">
+                                                            <button type="button" class="btn btn-danger btn-sm" onclick="eliminarVariante(this)">
+                                                                <i class="bi bi-trash"></i>
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                    index++;
+                                                }
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <div class="alert alert-warning" id="alertaSinVariantes" style="@(Model.Variantes != null && Model.Variantes.Any() ? "display:none;" : "")">
+                                    <i class="bi bi-exclamation-triangle"></i> No hay variantes. Use el formulario de abajo para agregar al menos una.
+                                </div>
+
+                                <div class="row g-2 align-items-end mt-3 p-3" style="background-color: #f8f9fa; border-radius: 8px;">
+                                    <div class="col-md-3">
+                                        <label class="form-label">Talla</label>
+                                        <select id="nuevaTalla" class="form-select">
+                                            <option value="">Seleccionar</option>
+                                            @foreach (var talla in Proyecto_DAS.ViewModels.Producto.ProductoEditViewModel.TallasDisponibles)
+                                            {
+                                                <option value="@talla">@talla</option>
+                                            }
+                                        </select>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label">Color <small class="text-muted">(máx. 20)</small></label>
+                                        <input type="text" id="nuevoColor" class="form-control" placeholder="Ej: Negro" maxlength="20" />
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label class="form-label">Stock Actual</label>
+                                        <input type="number" id="nuevoStockActual" class="form-control" value="0" min="0" />
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label class="form-label">Stock Minimo</label>
+                                        <input type="number" id="nuevoStockMinimo" class="form-control" value="5" min="0" />
+                                    </div>
+                                    <div class="col-md-2">
+                                        <button type="button" class="btn btn-success w-100" onclick="agregarVariante()">
+                                            <i class="bi bi-plus-lg"></i> Agregar
+                                        </button>
+                                    </div>
+                                </div>
+                                <span asp-validation-for="Variantes" class="text-danger d-block mt-2"></span>
+                            </div>
+                        </div>
+
+                        <div class="mb-3 form-check form-switch">
+                            <input asp-for="Estado" class="form-check-input" type="checkbox" />
+                            <label asp-for="Estado" class="form-check-label"></label>
+                        </div>
+
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle"></i> <strong>Fecha de Registro:</strong> @Model.FechaRegistro.ToString("dd/MM/yyyy HH:mm")
+                        </div>
+
+                        <div class="d-flex justify-content-between mt-4">
+                            <a asp-action="Index" class="btn btn-secondary">
+                                <i class="bi bi-x-circle-fill"></i> Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-success">
+                                <i class="bi bi-check-circle-fill"></i> Actualizar
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script src="~/js/validaciones.js"></script>
+
+    <script>
+        // Validaciones globales
+        ValidacionesYUNAN.validarPorId('Nombre', 'letrasNumerosEspacios');
+        ValidacionesYUNAN.validarContieneLetras('Nombre', 'nombreFeedback', 'El nombre del producto debe contener al menos una letra');
+        ValidacionesYUNAN.validarPorId('Descripcion', 'descripcion');
+        ValidacionesYUNAN.validarDescripcionConLetras('Descripcion', 'descripcionFeedback');
+        ValidacionesYUNAN.validarPorId('nuevoColor', 'soloLetras');
+    </script>
+
+    <script>
+        let varianteIndex = @(Model.Variantes?.Count ?? 0);
+        const MAX_VARIANTES = 5;
+        const MAX_COLOR_LENGTH = 20;
+
+        function previewImage(event) {
+            const reader = new FileReader();
+            reader.onload = function () {
+                const output = document.getElementById('imagenPreview');
+                output.src = reader.result;
+            };
+            reader.readAsDataURL(event.target.files[0]);
+        }
+
+        function agregarVariante() {
+            const talla = document.getElementById('nuevaTalla').value.trim();
+            const color = document.getElementById('nuevoColor').value.trim();
+            const stockActual = parseInt(document.getElementById('nuevoStockActual').value) || 0;
+            const stockMinimo = parseInt(document.getElementById('nuevoStockMinimo').value) || 0;
+
+            const variantesActuales = document.querySelectorAll('#variantesBody tr').length;
+            if (variantesActuales >= MAX_VARIANTES) {
+                alert(`No se pueden agregar más de ${MAX_VARIANTES} variantes por producto`);
+                return;
+            }
+
+            if (!talla) {
+                alert('Debe seleccionar una talla');
+                return;
+            }
+            if (!color) {
+                alert('Debe ingresar un color');
+                return;
+            }
+
+            if (color.length > MAX_COLOR_LENGTH) {
+                alert(`El color no puede tener más de ${MAX_COLOR_LENGTH} caracteres`);
+                return;
+            }
+
+            if (!ValidacionesYUNAN.regex.soloLetras.test(color)) {
+                alert('El color solo puede contener letras y espacios');
+                return;
+            }
+
+            if (stockActual <= stockMinimo) {
+                alert('El stock actual no puede ser menor o igual que el stock mínimo');
+                return;
+            }
+
+            const existentes = document.querySelectorAll('#variantesBody tr');
+            for (let row of existentes) {
+                const tallaExistente = row.querySelector('input[name$=".Talla"]').value;
+                const colorExistente = row.querySelector('input[name$=".Color"]').value;
+                if (tallaExistente === talla && colorExistente.toLowerCase() === color.toLowerCase()) {
+                    alert('Ya existe una variante con esa talla y color');
+                    return;
+                }
+            }
+
+            const tbody = document.getElementById('variantesBody');
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>
+                    <input type="hidden" name="Variantes[${varianteIndex}].Talla" value="${talla}" />
+                    <span class="badge bg-secondary fs-6">${talla}</span>
+                </td>
+                <td>
+                    <input type="hidden" name="Variantes[${varianteIndex}].Color" value="${color}" />
+                    <span>${color}</span>
+                </td>
+                <td>
+                    <input type="number" name="Variantes[${varianteIndex}].StockActual" class="form-control form-control-sm stock-input" value="${stockActual}" min="0" required onchange="actualizarStockTotal()" />
+                </td>
+                <td>
+                    <input type="number" name="Variantes[${varianteIndex}].StockMinimo" class="form-control form-control-sm" value="${stockMinimo}" min="0" required />
+                </td>
+                <td class="text-center">
+                    <input type="checkbox" name="Variantes[${varianteIndex}].Estado" value="true" class="form-check-input estado-checkbox" checked onchange="actualizarStockTotal()" />
+                    <input type="hidden" name="Variantes[${varianteIndex}].Estado" value="false" class="estado-hidden" />
+                </td>
+                <td class="text-center">
+                    <button type="button" class="btn btn-danger btn-sm" onclick="eliminarVariante(this)">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </td>
+            `;
+
+            tbody.appendChild(row);
+            varianteIndex++;
+
+            document.getElementById('nuevaTalla').value = '';
+            document.getElementById('nuevoColor').value = '';
+            document.getElementById('nuevoStockActual').value = '0';
+            document.getElementById('nuevoStockMinimo').value = '5';
+
+            actualizarAlertaSinVariantes();
+            actualizarStockTotal();
+        }
+
+        function eliminarVariante(btn) {
+            const row = btn.closest('tr');
+            row.remove();
+            reindexarVariantes();
+            actualizarAlertaSinVariantes();
+            actualizarStockTotal();
+        }
+
+        function reindexarVariantes() {
+            const rows = document.querySelectorAll('#variantesBody tr');
+            varianteIndex = 0;
+            rows.forEach((row, index) => {
+                const inputs = row.querySelectorAll('input');
+                inputs.forEach(input => {
+                    const name = input.name;
+                    if (name) {
+                        input.name = name.replace(/\[\d+\]/, `[${index}]`);
+                    }
+                });
+                varianteIndex = index + 1;
+            });
+        }
+
+        function actualizarAlertaSinVariantes() {
+            const tbody = document.getElementById('variantesBody');
+            const alerta = document.getElementById('alertaSinVariantes');
+            if (tbody.children.length === 0) {
+                alerta.style.display = 'block';
+            } else {
+                alerta.style.display = 'none';
+            }
+        }
+
+        function actualizarStockTotal() {
+            let total = 0;
+            const rows = document.querySelectorAll('#variantesBody tr');
+            rows.forEach(row => {
+                const checkbox = row.querySelector('.estado-checkbox');
+                const stockInput = row.querySelector('.stock-input');
+                if (checkbox && checkbox.checked && stockInput) {
+                    total += parseInt(stockInput.value) || 0;
+                }
+            });
+            document.getElementById('stockTotalDisplay').textContent = total;
+        }
+
+        document.getElementById('formProducto').addEventListener('submit', function (e) {
+            const variantes = document.querySelectorAll('#variantesBody tr');
+            if (variantes.length === 0) {
+                e.preventDefault();
+                alert('Debe tener al menos una variante (talla y color)');
+                return false;
+            }
+        });
+
+        actualizarAlertaSinVariantes();
+        actualizarStockTotal();
+    </script>
+}

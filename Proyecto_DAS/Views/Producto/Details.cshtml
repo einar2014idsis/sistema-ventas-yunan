@@ -1,0 +1,196 @@
+@model Proyecto_DAS.ViewModels.Producto.ProductoViewModel
+@{
+    ViewData["Title"] = "Detalles del Producto";
+    var variantes = ViewBag.Variantes as List<Proyecto_DAS.Models.ProductoVariante>;
+}
+
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <h1 class="display-4">@ViewData["Title"]</h1>
+            <hr />
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-10 offset-md-1">
+            <div class="card shadow">
+                <div class="card-header bg-dark text-white">
+                    <h3 class="mb-0">@Model.Nombre</h3>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4 text-center">
+                            <div style="max-width: 300px; margin: 0 auto; background-color: #f0f0f0; border-radius: 0.375rem; overflow: hidden;">
+                                <img src="@Model.ImagenUrl" alt="@Model.Nombre"
+                                     asp-append-version="true"
+                                     class="img-fluid"
+                                     style="width: 100%; height: 300px; object-fit: contain;"
+                                     onerror="this.src='/img/Img_Productos/default.jpg';" />
+                            </div>
+                            <div class="mt-3">
+                                @if (Model.Estado)
+                                {
+                                    <span class="badge bg-success fs-5">Activo</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary fs-5">Inactivo</span>
+                                }
+
+                                @if (Model.TieneStockBajo)
+                                {
+                                    <span class="badge bg-warning text-dark fs-6 ms-2">
+                                        <i class="bi bi-exclamation-triangle"></i> @Model.VariantesConStockBajo variante(s) con stock bajo
+                                    </span>
+                                }
+                            </div>
+                        </div>
+
+                        <div class="col-md-8">
+                            <dl class="row">
+                                <dt class="col-sm-4">Categoria</dt>
+                                <dd class="col-sm-8">@Model.CategoriaNombre</dd>
+
+                                <dt class="col-sm-4">Proveedor</dt>
+                                <dd class="col-sm-8">@Model.ProveedorNombre</dd>
+
+                                <dt class="col-sm-4">@Html.DisplayNameFor(model => model.Descripcion)</dt>
+                                <dd class="col-sm-8">@Model.Descripcion</dd>
+
+                                <dt class="col-sm-4">@Html.DisplayNameFor(model => model.Talla)</dt>
+                                <dd class="col-sm-8">@Model.Talla</dd>
+
+                                <dt class="col-sm-4">@Html.DisplayNameFor(model => model.Color)</dt>
+                                <dd class="col-sm-8">@Model.Color</dd>
+
+                                <dt class="col-sm-4">@Html.DisplayNameFor(model => model.FechaRegistro)</dt>
+                                <dd class="col-sm-8">@Model.FechaRegistro.ToString("dd/MM/yyyy HH:mm")</dd>
+                            </dl>
+
+                            <hr />
+
+                            <h5 class="mb-3">Informacion de Precios</h5>
+                            <dl class="row">
+                                <dt class="col-sm-4">@Html.DisplayNameFor(model => model.PrecioCompra)</dt>
+                                <dd class="col-sm-8">S/ @Model.PrecioCompra.ToString("N2")</dd>
+
+                                <dt class="col-sm-4">@Html.DisplayNameFor(model => model.PrecioVenta)</dt>
+                                <dd class="col-sm-8"><strong class="text-success">S/ @Model.PrecioVenta.ToString("N2")</strong></dd>
+
+                                <dt class="col-sm-4">Margen</dt>
+                                <dd class="col-sm-8">
+                                    <span class="badge bg-info">S/ @Model.Margen.ToString("N2")</span>
+                                </dd>
+                            </dl>
+
+                            <hr />
+
+                            <h5 class="mb-3">Stock Total</h5>
+                            <dl class="row">
+                                <dt class="col-sm-4">@Html.DisplayNameFor(model => model.StockActual)</dt>
+                                <dd class="col-sm-8">
+                                    <span class="badge @(Model.TieneStockBajo ? "bg-warning text-dark" : "bg-success") fs-6">
+                                        @Model.StockActual unidades
+                                    </span>
+                                </dd>
+                            </dl>
+                        </div>
+                    </div>
+
+                    <!-- Tabla de Variantes -->
+                    <div class="mt-4">
+                        <div class="card" style="border: 2px solid #f1149b;">
+                            <div class="card-header" style="background-color: #f1149b; color: white;">
+                                <h5 class="mb-0"><i class="bi bi-grid-3x3-gap-fill"></i> Detalle de Variantes (Talla x Color)</h5>
+                            </div>
+                            <div class="card-body p-0">
+                                <div class="table-responsive">
+                                    <table class="table table-bordered table-hover mb-0">
+                                        <thead class="table-dark">
+                                            <tr>
+                                                <th>Talla</th>
+                                                <th>Color</th>
+                                                <th>Stock Actual</th>
+                                                <th>Stock Minimo</th>
+                                                <th>Estado Stock</th>
+                                                <th>Activo</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @if (variantes != null && variantes.Any())
+                                            {
+                                                foreach (var v in variantes.OrderBy(x => x.Talla).ThenBy(x => x.Color))
+                                                {
+                                                    var stockBajo = v.StockActual <= v.StockMinimo;
+                                                    <tr class="@(!v.Estado ? "table-secondary" : stockBajo ? "table-warning" : "")">
+                                                        <td><span class="badge bg-secondary fs-6">@v.Talla</span></td>
+                                                        <td>@v.Color</td>
+                                                        <td>
+                                                            <span class="badge @(stockBajo ? "bg-danger" : "bg-success")">
+                                                                @v.StockActual
+                                                            </span>
+                                                        </td>
+                                                        <td>@v.StockMinimo</td>
+                                                        <td>
+                                                            @if (stockBajo)
+                                                            {
+                                                                <span class="badge bg-danger">
+                                                                    <i class="bi bi-exclamation-triangle-fill"></i> Bajo
+                                                                </span>
+                                                            }
+                                                            else
+                                                            {
+                                                                <span class="badge bg-success">
+                                                                    <i class="bi bi-check-circle-fill"></i> OK
+                                                                </span>
+                                                            }
+                                                        </td>
+                                                        <td>
+                                                            @if (v.Estado)
+                                                            {
+                                                                <span class="badge bg-success">Activo</span>
+                                                            }
+                                                            else
+                                                            {
+                                                                <span class="badge bg-secondary">Inactivo</span>
+                                                            }
+                                                        </td>
+                                                    </tr>
+                                                }
+                                            }
+                                            else
+                                            {
+                                                <tr>
+                                                    <td colspan="6" class="text-center text-muted">
+                                                        <i class="bi bi-inbox"></i> No hay variantes registradas
+                                                    </td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    @if (Model.TieneStockBajo)
+                    {
+                        <div class="alert alert-warning mt-3">
+                            <i class="bi bi-exclamation-triangle-fill"></i>
+                            <strong>Atencion:</strong> Hay @Model.VariantesConStockBajo variante(s) con stock igual o por debajo del minimo.
+                            Se recomienda reabastecer estas variantes.
+                        </div>
+                    }
+                </div>
+                <div class="card-footer">
+                    <div class="d-flex justify-content-between">
+                        <a asp-action="Index" class="btn btn-secondary">
+                            <i class="bi bi-arrow-left-circle-fill"></i> Volver
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

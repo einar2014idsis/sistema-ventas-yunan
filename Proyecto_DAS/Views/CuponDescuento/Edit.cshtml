@@ -1,0 +1,95 @@
+@model Proyecto_DAS.ViewModels.CuponDescuento.CuponDescuentoEditViewModel
+
+@{
+    ViewData["Title"] = "Editar Cupón de Descuento";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-header" style="background-color: #f1149b; color: white;">
+                    <h4 class="mb-0"><i class="bi bi-pencil"></i> Editar Cupón de Descuento</h4>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Edit" method="post" autocomplete="off">
+                        <input type="hidden" asp-for="IdCuponDescuento" />
+                        <input type="hidden" asp-for="FechaCreacion" />
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="CodigoCupon" class="form-label"></label>
+                                <input asp-for="CodigoCupon" class="form-control" placeholder="Ej: CAJ100" id="CodigoCupon" maxlength="12" style="text-transform:uppercase" />
+                                <span asp-validation-for="CodigoCupon" class="text-danger"></span>
+                                <div id="codigoCuponFeedback"></div>
+                                <small class="form-text text-muted">
+                                    <i class="bi bi-info-circle"></i> Solo letras mayúsculas y números (6-12 caracteres)
+                                </small>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="PorcentajeDescuento" class="form-label"></label>
+                                <div class="input-group">
+                                    <input asp-for="PorcentajeDescuento" class="form-control" type="number" min="1" max="95" />
+                                    <span class="input-group-text">%</span>
+                                </div>
+                                <span asp-validation-for="PorcentajeDescuento" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="FechaInicio" class="form-label"></label>
+                                <input asp-for="FechaInicio" class="form-control" type="date" />
+                                <span asp-validation-for="FechaInicio" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="FechaVencimiento" class="form-label"></label>
+                                <input asp-for="FechaVencimiento" class="form-control" type="date" />
+                                <span asp-validation-for="FechaVencimiento" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="form-check form-switch">
+                                <input asp-for="Estado" class="form-check-input" type="checkbox" />
+                                <label asp-for="Estado" class="form-check-label">
+                                    Cupón Activo
+                                </label>
+                            </div>
+                            <small class="form-text text-muted">
+                                <i class="bi bi-info-circle"></i> Si está inactivo, no podrá ser usado en ventas
+                            </small>
+                        </div>
+
+                        <div class="alert alert-info">
+                            <i class="bi bi-calendar"></i> Fecha de Creación: <strong>@Model.FechaCreacion.ToString("dd/MM/yyyy HH:mm")</strong>
+                        </div>
+
+                        <hr />
+
+                        <div class="d-flex justify-content-between">
+                            <a asp-action="Index" class="btn btn-secondary">
+                                <i class="bi bi-arrow-left"></i> Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-warning text-white">
+                                <i class="bi bi-save"></i> Guardar Cambios
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script src="~/js/validaciones.js"></script>
+    <script>
+        ValidacionesYUNAN.validarCodigoCupon('CodigoCupon');
+        ValidacionesYUNAN.validarContieneLetras('CodigoCupon', 'codigoCuponFeedback', 'El código debe contener al menos una letra');
+    </script>
+}

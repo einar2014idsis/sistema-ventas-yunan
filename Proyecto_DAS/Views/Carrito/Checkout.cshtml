@@ -1,0 +1,833 @@
+@model List<Proyecto_DAS.ViewModels.Carrito.CarritoItemViewModel>
+@{
+    ViewData["Title"] = "Confirmar Compra";
+    Layout = "_LayoutCliente";
+    var total = Model.Sum(x => x.Subtotal);
+    var subtotalSinIGV = total / 1.18m;
+    var igv = total - subtotalSinIGV;
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header" style="background-color: #f8cde7;">
+                    <h5 class="mb-0"><i class="bi bi-bag-check me-2"></i>Resumen de tu pedido</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Producto</th>
+                                    <th class="text-center">Cantidad</th>
+                                    <th class="text-end">Precio</th>
+                                    <th class="text-end">Subtotal</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model)
+                                {
+                                    <tr>
+                                        <td>
+                                            <strong>@item.NombreProducto</strong>
+                                            <br />
+                                            <small class="text-muted">@item.Color - Talla @item.Talla</small>
+                                        </td>
+                                        <td class="text-center">@item.Cantidad</td>
+                                        <td class="text-end">S/ @item.PrecioUnitario.ToString("F2")</td>
+                                        <td class="text-end fw-bold">S/ @item.Subtotal.ToString("F2")</td>
+                                    </tr>
+                                }
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <td colspan="3" class="text-end">Subtotal:</td>
+                                    <td class="text-end">S/ @subtotalSinIGV.ToString("F2")</td>
+                                </tr>
+                                <tr>
+                                    <td colspan="3" class="text-end">IGV (18%):</td>
+                                    <td class="text-end">S/ @igv.ToString("F2")</td>
+                                </tr>
+                                <tr>
+                                    <td colspan="3" class="text-end"><strong>Total a pagar:</strong></td>
+                                    <td class="text-end" style="color: #f1149b; font-size: 1.3rem;"><strong>S/ @total.ToString("F2")</strong></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sección de Dirección de Envío -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header" style="background-color: #f8cde7;">
+                    <h5 class="mb-0">
+                        <span class="badge bg-dark me-2">1</span>
+                        <i class="bi bi-geo-alt-fill me-2"></i>Dirección de Envío
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-light border" id="alertDireccionSeleccionada" style="display: none;">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <h6 class="mb-2 text-success"><i class="bi bi-check-circle-fill me-2"></i>Dirección confirmada:</h6>
+                                <p class="mb-1"><strong>Dirección:</strong> <span id="direccionConfirmada"></span></p>
+                                <p class="mb-1"><strong>Ciudad:</strong> <span id="ciudadConfirmada"></span></p>
+                                <p class="mb-0"><strong>Código Postal:</strong> <span id="codigoPostalConfirmado"></span></p>
+                            </div>
+                            <button type="button" class="btn btn-sm btn-outline-secondary" id="btnCambiarDireccion">
+                                <i class="bi bi-pencil me-1"></i> Cambiar
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="seccionSeleccionDireccion">
+                        <div class="alert alert-light border">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <h6 class="mb-2"><i class="bi bi-house-door me-2"></i>Tu dirección registrada:</h6>
+                                    <p class="mb-1"><strong>Dirección:</strong> @ViewBag.DireccionRegistrada</p>
+                                    <p class="mb-1"><strong>Ciudad:</strong> @ViewBag.CiudadRegistrada</p>
+                                    <p class="mb-0"><strong>Código Postal:</strong> @ViewBag.CodigoPostalRegistrado</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex gap-2 flex-wrap">
+                            <button type="button" class="btn btn-success" id="btnUsarDireccionRegistrada">
+                                <i class="bi bi-check-circle me-1"></i> Enviar a esta dirección
+                            </button>
+                            <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#modalDireccionTemporal">
+                                <i class="bi bi-pencil-square me-1"></i> Usar otra dirección
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cupón de Descuento (opcional -->
+            <div class="card shadow-sm mb-4" id="seccionCupon" style="opacity: 0.5; pointer-events: none;">
+                <div class="card-header" style="background-color: #f8cde7;">
+                    <h5 class="mb-0">
+                        <span class="badge bg-dark me-2">2</span>
+                        <i class="bi bi-tag-fill me-2"></i>Cupón de Descuento (Opcional)
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-warning" id="alertCuponPendiente">
+                        <i class="bi bi-exclamation-triangle me-2"></i>
+                        <strong>Primero confirma tu dirección de envío</strong> para aplicar un cupón.
+                    </div>
+
+                    <div id="contenidoCupon" style="display: none;">
+                        <div class="text-center">
+                            <p class="text-muted mb-3">
+                                <i class="bi bi-info-circle me-1"></i>
+                                Si tienes un cupón de descuento, ingrésalo aquí. Si no tienes, puedes continuar sin usarlo.
+                            </p>
+
+                            <div class="row justify-content-center">
+                                <div class="col-md-6 col-lg-5">
+                                    <label for="codigoCupon" class="form-label">Código del cupón</label>
+                                    <input type="text" class="form-control" id="codigoCupon" name="codigoCupon"
+                                           placeholder="Ej: DESC20, CAJ100" maxlength="12" style="text-transform: uppercase;">
+                                    <small class="text-muted">Deja vacío si no tienes cupón</small>
+
+                                    <button type="button" class="btn btn-outline-success w-100 mt-3" id="btnValidarCupon">
+                                        <i class="bi bi-check2-circle me-1"></i> Validar Cupón
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div id="resultadoCupon" class="mt-3" style="display: none;"></div>
+                        </div>
+
+                        <div class="mt-3">
+                            <button type="button" class="btn btn-sm btn-link text-decoration-none" id="btnContinuarSinCupon">
+                                Continuar sin cupón <i class="bi bi-arrow-right ms-1"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Método de Pago (bloqueado hasta confirmar dirección) -->
+            <div class="card shadow-sm mb-4" id="seccionMetodoPago" style="opacity: 0.5; pointer-events: none;">
+                <div class="card-header" style="background-color: #f8cde7;">
+                    <h5 class="mb-0">
+                        <span class="badge bg-dark me-2">3</span>
+                        <i class="bi bi-credit-card me-2"></i>Método de Pago
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-warning" id="alertMetodoPagoPendiente">
+                        <i class="bi bi-exclamation-triangle me-2"></i>
+                        <strong>Completa el paso del cupón</strong> para continuar con el pago.
+                    </div>
+
+                    <!-- Selección de método de pago -->
+                    <div id="contenidoMetodoPago" style="display: none;">
+                        <h6 class="mb-3">Selecciona tu método de pago:</h6>
+
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <div class="form-check card p-3">
+                                    <input class="form-check-input" type="radio" name="metodoPago" id="radioTarjeta" value="Tarjeta" checked>
+                                    <label class="form-check-label w-100" for="radioTarjeta">
+                                        <div class="d-flex align-items-center">
+                                            <i class="bi bi-credit-card-2-front fs-3 me-3" style="color: #f1149b;"></i>
+                                            <div>
+                                                <strong>Tarjeta de Crédito/Débito</strong>
+                                                <br>
+                                                <small class="text-muted">Visa, Mastercard, etc.</small>
+                                            </div>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="form-check card p-3">
+                                    <input class="form-check-input" type="radio" name="metodoPago" id="radioYape" value="Yape">
+                                    <label class="form-check-label w-100" for="radioYape">
+                                        <div class="d-flex align-items-center">
+                                            <i class="bi bi-phone fs-3 me-3" style="color: #6c2c91;"></i>
+                                            <div>
+                                                <strong>Yape</strong>
+                                                <br>
+                                                <small class="text-muted">Pago con celular</small>
+                                            </div>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Formulario de Tarjeta -->
+                        <div id="formTarjeta">
+                            <h6 class="mb-3"><i class="bi bi-credit-card me-2"></i>Datos de la Tarjeta</h6>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Número de Tarjeta <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" id="numeroTarjeta" placeholder="1234 5678 9012 3456" maxlength="19">
+                                    <small class="text-muted">16 dígitos</small>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Nombre en la Tarjeta <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" id="nombreTarjeta" placeholder="NOMBRE APELLIDO" style="text-transform: uppercase;">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Fecha de Expiración <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" id="expiracionTarjeta" placeholder="MM/AA" maxlength="5">
+                                    <small class="text-muted">Formato: MM/AA</small>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">CVV <span class="text-danger">*</span></label>
+                                    <input type="password" class="form-control" id="cvvTarjeta" placeholder="123" maxlength="3">
+                                    <small class="text-muted">3 dígitos en el reverso</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Formulario de Yape -->
+                        <div id="formYape" style="display: none;">
+                            <h6 class="mb-3"><i class="bi bi-phone me-2"></i>Datos de Yape</h6>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Número de Celular <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" id="celularYape" placeholder="999 888 777" maxlength="9" pattern="9[0-9]{8}">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Código de Operación <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" id="codigoYape" placeholder="123456" maxlength="6" pattern="[0-9]{6}">
+                                    <small class="text-muted">6 dígitos</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr class="my-4" />
+
+                        <div class="alert alert-warning mb-4" role="alert">
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                            <strong>Importante:</strong> No se aceptan devoluciones. Al confirmar tu compra aceptas esta política.
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <a asp-controller="Carrito" asp-action="Index" class="btn btn-outline-secondary">
+                                <i class="bi bi-arrow-left me-1"></i> Volver al carrito
+                            </a>
+                            <button type="button" class="btn btn-lg" style="background-color: #f1149b; border-color: #f1149b; color: white;" id="btnFinalizarCompra">
+                                <i class="bi bi-check-circle me-2"></i>Finalizar Compra
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Dirección temporal -->
+<div class="modal fade" id="modalDireccionTemporal" tabindex="-1" aria-labelledby="modalDireccionTemporalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header" style="background-color: #f8cde7;">
+                <h5 class="modal-title" id="modalDireccionTemporalLabel">
+                    <i class="bi bi-geo-alt me-2"></i>Ingresar Dirección de Envío
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-warning">
+                    <i class="bi bi-exclamation-triangle me-2"></i>
+                    Esta dirección se usará solo para este pedido y no actualizará tu dirección registrada.
+                </div>
+
+                <form id="formDireccionTemporal" autocomplete="off">
+                    <div class="mb-3">
+                        <label for="direccionTemporal" class="form-label">Dirección Completa <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="direccionTemporal" name="direccionTemporal"
+                               placeholder="Ej: Av. Larco 123, Urb. San Andrés" required>
+                        <div class="invalid-feedback">Por favor ingresa una dirección válida.</div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="ciudadTemporal" class="form-label">Ciudad <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="ciudadTemporal" name="ciudadTemporal"
+                                   placeholder="Ej: Trujillo" required>
+                            <div class="invalid-feedback">Por favor ingresa una ciudad válida.</div>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="codigoPostalTemporal" class="form-label">Código Postal <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="codigoPostalTemporal" name="codigoPostalTemporal"
+                                   placeholder="Ej: 13001" maxlength="6" required>
+                            <small class="text-muted">Solo números (4-6 dígitos)</small>
+                            <div class="invalid-feedback">Por favor ingresa un código postal válido.</div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="bi bi-x-circle me-1"></i> Cancelar
+                </button>
+                <button type="button" class="btn btn-primary" id="btnConfirmarDireccionTemporal">
+                    <i class="bi bi-check-circle me-1"></i> Confirmar y Continuar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div id="loadingOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 9999; justify-content: center; align-items: center; flex-direction: column;">
+    <div class="text-center text-white">
+        <div class="spinner-border text-light mb-3" style="width: 3rem; height: 3rem;" role="status">
+            <span class="visually-hidden">Procesando...</span>
+        </div>
+        <h4 class="mb-2">Procesando tu compra...</h4>
+        <p class="mb-0">Por favor no cierres ni actualices esta página</p>
+        <p class="small text-light opacity-75 mt-2">Estamos generando tu boleta y enviándola a tu correo</p>
+    </div>
+</div>
+
+<!-- Formulario oculto para enviar la compra -->
+<form id="formConfirmarCompra" asp-controller="Carrito" asp-action="ConfirmarCompra" method="post" style="display: none;" autocomplete="off">
+    <input type="hidden" name="usarDireccionRegistrada" id="usarDireccionRegistrada" value="true">
+    <input type="hidden" name="direccionEnvio" id="direccionEnvio">
+    <input type="hidden" name="ciudadEnvio" id="ciudadEnvio">
+    <input type="hidden" name="codigoPostalEnvio" id="codigoPostalEnvio">
+    <input type="hidden" name="metodoPago" id="metodoPagoHidden">
+    <input type="hidden" name="celularYape" id="celularYapeHidden">
+    <input type="hidden" name="codigoOperacionYape" id="codigoOperacionYapeHidden">
+
+    <input type="hidden" name="numeroTarjeta" id="numeroTarjetaHidden">
+    <input type="hidden" name="nombreTarjeta" id="nombreTarjetaHidden">
+    <input type="hidden" name="expiracionTarjeta" id="expiracionTarjetaHidden">
+    <input type="hidden" name="cvvTarjeta" id="cvvTarjetaHidden">
+
+    <input type="hidden" name="codigoCupon" id="codigoCuponHidden">
+</form>
+
+@section Scripts {
+    <script src="~/js/validaciones.js"></script>
+    <script>
+        $(document).ready(function() {
+            var direccionConfirmada = false;
+            var direccionData = {
+                usarRegistrada: true,
+                direccion: '@ViewBag.DireccionRegistrada',
+                ciudad: '@ViewBag.CiudadRegistrada',
+                codigoPostal: '@ViewBag.CodigoPostalRegistrado'
+            };
+
+            $('#btnUsarDireccionRegistrada').click(function() {
+                direccionData.usarRegistrada = true;
+                direccionData.direccion = '@ViewBag.DireccionRegistrada';
+                direccionData.ciudad = '@ViewBag.CiudadRegistrada';
+                direccionData.codigoPostal = '@ViewBag.CodigoPostalRegistrado';
+
+                mostrarDireccionConfirmada();
+                habilitarCupon();
+            });
+
+
+            // Función para limpiar y validar dirección
+            function limpiarDireccion(valor) {
+                valor = valor.replace(/[^a-zA-Z0-9áéíóúÁÉÍÓÚñÑüÜ\s,.\-#]/g, '');
+                valor = valor.replace(/\.{2,}/g, '.');
+                valor = valor.replace(/#{2,}/g, '#');
+                valor = valor.replace(/-{2,}/g, '-');
+                valor = valor.replace(/,{2,}/g, ',');
+                valor = valor.replace(/^[^a-zA-Z0-9áéíóúÁÉÍÓÚñÑüÜ]+/, '');
+                return valor;
+            }
+
+            $('#direccionTemporal').on('input', function() {
+                let valor = $(this).val();
+                let valorLimpio = limpiarDireccion(valor);
+
+                if (valor !== valorLimpio) {
+                    $(this).val(valorLimpio);
+                    if (/\.{2,}/.test(valor) || /#{2,}/.test(valor) || /-{2,}/.test(valor) || /,{2,}/.test(valor)) {
+                        showToast('No se permiten caracteres especiales consecutivos', 'error');
+                    } else if (/^[^a-zA-Z0-9áéíóúÁÉÍÓÚñÑüÜ]/.test(valor)) {
+                        showToast('La dirección debe iniciar con letra o número', 'error');
+                    } else {
+                        showToast('La dirección contiene caracteres no permitidos', 'error');
+                    }
+                }
+            });
+
+            $('#direccionTemporal').on('paste', function(e) {
+                var input = this;
+                setTimeout(function() {
+                    var valor = $(input).val();
+                    var valorLimpio = limpiarDireccion(valor);
+                    if (valor !== valorLimpio) {
+                        $(input).val(valorLimpio);
+                        showToast('Se corrigió la dirección pegada (caracteres no válidos)', 'warning');
+                    }
+                }, 10);
+            });
+
+            $('#ciudadTemporal').on('input', function() {
+                let valor = $(this).val();
+                if (valor && !ValidacionesYUNAN.regex.soloLetras.test(valor)) {
+                    $(this).val(valor.slice(0, -1));
+                    showToast('La ciudad solo permite letras y espacios', 'error');
+                }
+            });
+
+            ValidacionesYUNAN.validarPorId('codigoPostalTemporal', 'soloNumeros');
+
+            $('#btnConfirmarDireccionTemporal').click(function() {
+                var form = $('#formDireccionTemporal')[0];
+
+                if (!form.checkValidity()) {
+                    form.reportValidity();
+                    return;
+                }
+
+                var direccion = $('#direccionTemporal').val().trim();
+                var ciudad = $('#ciudadTemporal').val().trim();
+                var codigoPostal = $('#codigoPostalTemporal').val().trim();
+
+                if (direccion.length < 10) {
+                    showToast('La dirección debe tener al menos 10 caracteres', 'error');
+                    $('#direccionTemporal').focus();
+                    return;
+                }
+
+                // Validar caracteres especiales consecutivos
+                if (/\.{2,}/.test(direccion) || /#{2,}/.test(direccion) || /-{2,}/.test(direccion) || /,{2,}/.test(direccion)) {
+                    showToast('La dirección no puede tener caracteres especiales consecutivos (##, .., --, ,,)', 'error');
+                    $('#direccionTemporal').focus();
+                    return;
+                }
+
+                if (/^[^a-zA-Z0-9áéíóúÁÉÍÓÚñÑüÜ]/.test(direccion)) {
+                    showToast('La dirección debe iniciar con letra o número', 'error');
+                    $('#direccionTemporal').focus();
+                    return;
+                }
+
+                if (!ValidacionesYUNAN.regex.direccion.test(direccion)) {
+                    showToast('La dirección contiene caracteres no permitidos', 'error');
+                    $('#direccionTemporal').focus();
+                    return;
+                }
+
+                if (!ValidacionesYUNAN.contieneLetras(direccion)) {
+                    showToast('La dirección debe contener letras, no solo números o símbolos', 'error');
+                    $('#direccionTemporal').focus();
+                    return;
+                }
+
+                if (ciudad.length < 3) {
+                    showToast('La ciudad debe tener al menos 3 caracteres', 'error');
+                    $('#ciudadTemporal').focus();
+                    return;
+                }
+
+                if (!ValidacionesYUNAN.regex.soloLetras.test(ciudad)) {
+                    showToast('La ciudad solo debe contener letras y espacios', 'error');
+                    $('#ciudadTemporal').focus();
+                    return;
+                }
+
+                if (codigoPostal.length < 4 || codigoPostal.length > 6) {
+                    showToast('El código postal debe tener entre 4 y 6 dígitos', 'error');
+                    $('#codigoPostalTemporal').focus();
+                    return;
+                }
+
+                if (!ValidacionesYUNAN.regex.soloNumeros.test(codigoPostal)) {
+                    showToast('El código postal solo debe contener números', 'error');
+                    $('#codigoPostalTemporal').focus();
+                    return;
+                }
+
+                if (codigoPostal === '0000' || codigoPostal === '00000' || codigoPostal === '000000') {
+                    showToast('El código postal no puede ser todo ceros', 'error');
+                    $('#codigoPostalTemporal').focus();
+                    return;
+                }
+
+                direccionData.usarRegistrada = false;
+                direccionData.direccion = direccion;
+                direccionData.ciudad = ciudad;
+                direccionData.codigoPostal = codigoPostal;
+
+                $('#modalDireccionTemporal').modal('hide');
+                mostrarDireccionConfirmada();
+                habilitarCupon();
+            });
+
+            $('#btnCambiarDireccion').click(function() {
+                $('#alertDireccionSeleccionada').hide();
+                $('#seccionSeleccionDireccion').show();
+                deshabilitarCupon();
+                deshabilitarMetodoPago();
+            });
+
+            function mostrarDireccionConfirmada() {
+                $('#direccionConfirmada').text(direccionData.direccion);
+                $('#ciudadConfirmada').text(direccionData.ciudad);
+                $('#codigoPostalConfirmado').text(direccionData.codigoPostal);
+
+                $('#seccionSeleccionDireccion').hide();
+                $('#alertDireccionSeleccionada').show();
+                direccionConfirmada = true;
+            }
+
+            function habilitarMetodoPago() {
+                $('#seccionMetodoPago').css({
+                    'opacity': '1',
+                    'pointer-events': 'auto'
+                });
+                $('#alertMetodoPagoPendiente').hide();
+                $('#contenidoMetodoPago').show();
+
+                $('html, body').animate({
+                    scrollTop: $('#seccionMetodoPago').offset().top - 20
+                }, 500);
+            }
+
+            function deshabilitarMetodoPago() {
+                $('#seccionMetodoPago').css({
+                    'opacity': '0.5',
+                    'pointer-events': 'none'
+                });
+                $('#alertMetodoPagoPendiente').show();
+                $('#contenidoMetodoPago').hide();
+            }
+
+            function habilitarCupon() {
+                $('#seccionCupon').css({
+                    'opacity': '1',
+                    'pointer-events': 'auto'
+                });
+                $('#alertCuponPendiente').hide();
+                $('#contenidoCupon').show();
+
+                $('html, body').animate({
+                    scrollTop: $('#seccionCupon').offset().top - 20
+                }, 500);
+            }
+
+            function deshabilitarCupon() {
+                $('#seccionCupon').css({
+                    'opacity': '0.5',
+                    'pointer-events': 'none'
+                });
+                $('#alertCuponPendiente').show();
+                $('#contenidoCupon').hide();
+                cuponValidado = false;
+                cuponAplicado = null;
+            }
+
+            $('#modalDireccionTemporal').on('hidden.bs.modal', function () {
+                $('#formDireccionTemporal')[0].reset();
+                $('#formDireccionTemporal').removeClass('was-validated');
+            });
+
+
+            $('input[name="metodoPago"]').change(function() {
+                if ($(this).val() === 'Tarjeta') {
+                    $('#formTarjeta').show();
+                    $('#formYape').hide();
+                } else {
+                    $('#formTarjeta').hide();
+                    $('#formYape').show();
+                }
+            });
+
+
+            $('#numeroTarjeta').on('input', function() {
+                var value = this.value.replace(/\s/g, '').replace(/[^0-9]/g, '');
+                var formattedValue = value.match(/.{1,4}/g)?.join(' ') || value;
+                this.value = formattedValue;
+            });
+
+            $('#expiracionTarjeta').on('input', function() {
+                var value = this.value.replace(/\D/g, '');
+                if (value.length >= 2) {
+                    this.value = value.substring(0, 2) + '/' + value.substring(2, 4);
+                } else {
+                    this.value = value;
+                }
+            });
+
+            $('#cvvTarjeta').on('input', function() {
+                this.value = this.value.replace(/[^0-9]/g, '');
+            });
+
+            $('#nombreTarjeta').on('input', function() {
+                this.value = this.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '').toUpperCase();
+            });
+
+            $('#celularYape').on('input', function() {
+                this.value = this.value.replace(/[^0-9]/g, '');
+            });
+
+            $('#codigoYape').on('input', function() {
+                this.value = this.value.replace(/[^0-9]/g, '');
+            });
+
+
+            var cuponValidado = false;
+            var cuponAplicado = null;
+
+            $('#codigoCupon').on('input', function() {
+                this.value = this.value.toUpperCase().trim();
+            });
+
+            $('#btnValidarCupon').click(function() {
+                var codigo = $('#codigoCupon').val().trim();
+
+                if (!codigo) {
+                    alert('Por favor ingresa un código de cupón');
+                    return;
+                }
+
+                $(this).prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-1"></span>Validando...');
+
+                $.ajax({
+                    url: '@Url.Action("ValidarCupon", "Carrito")',
+                    type: 'POST',
+                    data: { codigoCupon: codigo },
+                    success: function(response) {
+                        if (response.valido) {
+                            cuponValidado = true;
+                            cuponAplicado = response.cupon;
+                            $('#resultadoCupon').html(`
+                                <div class="alert alert-success d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <i class="bi bi-check-circle-fill me-2"></i>
+                                        <strong>¡Cupón válido!</strong> Se aplicará un descuento del <strong>${response.cupon.porcentajeDescuento}%</strong>
+                                        <br>
+                                        <small>Cupón: ${response.cupon.codigoCupon}</small>
+                                    </div>
+                                    <button type="button" class="btn btn-sm btn-outline-danger" id="btnQuitarCupon">
+                                        <i class="bi bi-x-circle me-1"></i>Quitar
+                                    </button>
+                                </div>
+                            `).show();
+                            $('#codigoCupon').prop('readonly', true);
+                            $('#btnValidarCupon').hide();
+                            $('#btnContinuarSinCupon').hide();
+
+                            $('#codigoCuponHidden').val(response.cupon.codigoCupon);
+                            habilitarMetodoPago();
+                        } else {
+                            cuponValidado = false;
+                            cuponAplicado = null;
+                            $('#resultadoCupon').html(`
+                                <div class="alert alert-danger">
+                                    <i class="bi bi-x-circle-fill me-2"></i>
+                                    <strong>Cupón inválido:</strong> ${response.mensaje}
+                                </div>
+                            `).show();
+                        }
+                        $('#btnValidarCupon').prop('disabled', false).html('<i class="bi bi-check2-circle me-1"></i> Validar Cupón');
+                    },
+                    error: function() {
+                        alert('Error al validar el cupón. Intenta de nuevo.');
+                        $('#btnValidarCupon').prop('disabled', false).html('<i class="bi bi-check2-circle me-1"></i> Validar Cupón');
+                    }
+                });
+            });
+
+            $('#btnContinuarSinCupon').click(function() {
+                cuponValidado = true;
+                cuponAplicado = null;
+                $('#codigoCuponHidden').val('');
+                habilitarMetodoPago();
+            });
+
+            // Quitar cupón aplicado
+            $(document).on('click', '#btnQuitarCupon', function() {
+                cuponValidado = false;
+                cuponAplicado = null;
+                $('#codigoCuponHidden').val('');
+                $('#codigoCupon').val('').prop('readonly', false);
+                $('#resultadoCupon').html('').hide();
+                $('#btnValidarCupon').show();
+                $('#btnContinuarSinCupon').show();
+            });
+
+            // Finalizar compra
+            $('#btnFinalizarCompra').click(function() {
+                if (!direccionConfirmada) {
+                    alert('Por favor, confirma primero tu dirección de envío.');
+                    return;
+                }
+
+                var metodoPago = $('input[name="metodoPago"]:checked').val();
+
+                if (metodoPago === 'Tarjeta') {
+                    var numeroTarjeta = $('#numeroTarjeta').val().trim();
+                    var nombreTarjeta = $('#nombreTarjeta').val().trim();
+                    var expiracionTarjeta = $('#expiracionTarjeta').val().trim();
+                    var cvvTarjeta = $('#cvvTarjeta').val().trim();
+
+                    if (!numeroTarjeta || !nombreTarjeta || !expiracionTarjeta || !cvvTarjeta) {
+                        alert('Por favor, completa todos los campos de la tarjeta.');
+                        return;
+                    }
+
+                    var numeroLimpio = numeroTarjeta.replace(/\s/g, '');
+                    if (!/^[0-9]{16}$/.test(numeroLimpio)) {
+                        alert('El número de tarjeta debe tener exactamente 16 dígitos.\nDígitos ingresados: ' + numeroLimpio.length);
+                        $('#numeroTarjeta').focus();
+                        return;
+                    }
+
+                    if (!/^[0-9]{3}$/.test(cvvTarjeta)) {
+                        alert('El CVV debe tener exactamente 3 dígitos.\nDígitos ingresados: ' + cvvTarjeta.length);
+                        $('#cvvTarjeta').focus();
+                        return;
+                    }
+
+                    if (nombreTarjeta.length < 5) {
+                        alert('El nombre en la tarjeta debe tener al menos 5 caracteres.');
+                        $('#nombreTarjeta').focus();
+                        return;
+                    }
+                    
+
+                    var partes = expiracionTarjeta.split('/');
+                    var mesExpiracion = parseInt(partes[0], 10);
+                    var anioExpiracion = 2000 + parseInt(partes[1], 10);
+
+                    var fechaActual = new Date();
+                    var mesActual = fechaActual.getMonth() + 1;
+                    var anioActual = fechaActual.getFullYear();
+
+                    if (mesExpiracion < 1 || mesExpiracion > 12)
+                    {
+                        alert("El mes de expiración no es válido");
+                        $('#expiracionTarjeta').focus;
+                        return;
+                    }
+
+                    if (!/^(0[1-9]|1[0-2])\/\d{2}$/.test(expiracionTarjeta)) {
+                        alert('La fecha de expiración debe tener el formato MM/AA.\nEjemplo: 12/25');
+                        $('#expiracionTarjeta').focus();
+                        return;
+                    }
+
+                    if (anioExpiracion < anioActual || (anioExpiracion === anioActual && mesExpiracion < mesActual)) {
+                        alert('La tarjeta está vencida.\nFecha de expiración: ' + expiracionTarjeta + '\nFecha actual: ' + String(mesActual).padStart(2, '0') + '/' + String(anioActual).substring(2));
+                        $('#expiracionTarjeta').focus();
+                        return;
+                    }
+
+                    if (anioExpiracion > anioActual + 5 || (anioExpiracion == anioActual + 5 && mesExpiracion > mesActual)) {
+                        alert('La tarjeta no puede tener una vigencia mayor a ' + mesActual+'/'+(anioActual + 5));
+                        $('#expiracionTarjeta').focus();
+                        return;
+                    }
+
+
+                    $('#numeroTarjetaHidden').val(numeroLimpio);
+                    $('#nombreTarjetaHidden').val(nombreTarjeta);
+                    $('#expiracionTarjetaHidden').val(expiracionTarjeta);
+                    $('#cvvTarjetaHidden').val(cvvTarjeta);
+
+                } else if (metodoPago === 'Yape') {
+                    var celularYape = $('#celularYape').val().trim();
+                    var codigoYape = $('#codigoYape').val().trim();
+
+                    if (!celularYape || !codigoYape) {
+                        alert('Por favor, completa todos los campos de Yape.');
+                        return;
+                    }
+
+                    if (!/^9[0-9]{8}$/.test(celularYape)) {
+                        alert('El número de celular debe empezar con 9 y tener exactamente 9 dígitos.');
+                        $('#celularYape').focus();
+                        return;
+                    }
+
+                    if (!/^[0-9]{6}$/.test(codigoYape)) {
+                        alert('El código de operación debe tener exactamente 6 dígitos.');
+                        $('#codigoYape').focus();
+                        return;
+                    }
+
+                    $('#celularYapeHidden').val(celularYape);
+                    $('#codigoOperacionYapeHidden').val(codigoYape);
+                }
+
+                $('#usarDireccionRegistrada').val(direccionData.usarRegistrada);
+                $('#direccionEnvio').val(direccionData.direccion);
+                $('#ciudadEnvio').val(direccionData.ciudad);
+                $('#codigoPostalEnvio').val(direccionData.codigoPostal);
+                $('#metodoPagoHidden').val(metodoPago);
+
+                if (cuponAplicado && cuponValidado) {
+                    $('#codigoCuponHidden').val(cuponAplicado.codigoCupon);
+                } else {
+                    $('#codigoCuponHidden').val('');
+                }
+
+
+                var mensajeConfirmacion = '¿Confirmas que deseas finalizar la compra?\n\nMétodo de pago: ' + metodoPago;
+                if (cuponAplicado) {
+                    mensajeConfirmacion += '\nCupón: ' + cuponAplicado.codigoCupon + ' (-' + cuponAplicado.porcentajeDescuento + '%)';
+                }
+
+                if (confirm(mensajeConfirmacion)) {
+                    $('#loadingOverlay').css('display', 'flex');
+                    $('#btnFinalizarCompra').prop('disabled', true);
+                    $('#formConfirmarCompra').submit();
+                }
+            });
+        });
+    </script>
+}
