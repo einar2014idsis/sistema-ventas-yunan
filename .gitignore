@@ -1,0 +1,28 @@
+# Visual Studio / .NET
+.vs/
+**/bin/
+**/obj/
+*.user
+*.suo
+
+# Configuración local y secretos
+**/appsettings.Development.json
+**/appsettings.Local.json
+**/appsettings.json
+!.github/appsettings.example.json
+
+# Base de datos y archivos locales
+*.mdf
+*.ldf
+*.db
+*.sqlite
+
+# Logs y archivos temporales
+*.log
+*.tmp
+TestResults/
+
+# Sistema operativo
+Thumbs.db
+Desktop.ini
+
