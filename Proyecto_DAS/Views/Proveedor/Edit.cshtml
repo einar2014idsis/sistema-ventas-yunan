@@ -1,0 +1,100 @@
+@model Proyecto_DAS.ViewModels.Proveedor.ProveedorEditViewModel
+
+@{
+    ViewData["Title"] = "Editar Proveedor";
+}
+
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <h1 class="display-4">@ViewData["Title"]</h1>
+            <hr />
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card shadow">
+                <div class="card-body">
+                    <form asp-action="Edit" method="post" autocomplete="off">
+                        <input type="hidden" asp-for="IdProveedor" />
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="NombreEmpresa" class="form-label"></label>
+                                <input asp-for="NombreEmpresa" class="form-control" placeholder="Ingrese el nombre de la empresa" id="NombreEmpresa" />
+                                <span asp-validation-for="NombreEmpresa" class="text-danger"></span>
+                                <div id="nombreEmpresaFeedback"></div>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="ContactoNombre" class="form-label"></label>
+                                <input asp-for="ContactoNombre" class="form-control" placeholder="Ingrese el nombre del contacto" id="ContactoNombre" />
+                                <span asp-validation-for="ContactoNombre" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="Celular" class="form-label"></label>
+                                <input asp-for="Celular" class="form-control" placeholder="Ingrese el celular (9 dígitos)" id="Celular" maxlength="9" />
+                                <span asp-validation-for="Celular" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="Email" class="form-label"></label>
+                                <input asp-for="Email" type="email" class="form-control" placeholder="Ingrese el email" />
+                                <span asp-validation-for="Email" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="Ruc" class="form-label"></label>
+                                <input asp-for="Ruc" class="form-control" placeholder="Ingrese el RUC (11 dígitos)" maxlength="11" id="Ruc" />
+                                <span asp-validation-for="Ruc" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="Direccion" class="form-label"></label>
+                                <input asp-for="Direccion" class="form-control" placeholder="Ingrese la dirección" id="Direccion" />
+                                <span asp-validation-for="Direccion" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="form-check form-switch">
+                                <input asp-for="Estado" class="form-check-input" type="checkbox" />
+                                <label asp-for="Estado" class="form-check-label">Proveedor Activo</label>
+                            </div>
+                            <span asp-validation-for="Estado" class="text-danger"></span>
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                            <a asp-action="Index" class="btn btn-secondary me-md-2">
+                                <i class="bi bi-x-circle-fill"></i> Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-save-fill"></i> Guardar Cambios
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script src="~/js/validaciones.js"></script>
+    <script>
+        ValidacionesYUNAN.validarPorId('NombreEmpresa', 'letrasNumerosEspacios');
+        ValidacionesYUNAN.validarContieneLetras('NombreEmpresa', 'nombreEmpresaFeedback', 'El nombre de la empresa debe contener al menos una letra');
+        ValidacionesYUNAN.validarPorId('ContactoNombre', 'soloLetras');
+        ValidacionesYUNAN.validarPorId('Celular', 'soloNumeros');
+        ValidacionesYUNAN.validarPorId('Ruc', 'soloNumeros');
+        ValidacionesYUNAN.validarPorId('Direccion', 'direccion');
+    </script>
+}

@@ -1,0 +1,152 @@
+@model Proyecto_DAS.ViewModels.Cliente.ClienteCreateViewModel
+@{
+    ViewData["Title"] = "Nuevo Cliente";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-header" style="background-color: #f8cde7;">
+                    <h4 class="mb-0"><i class="bi bi-person-plus me-2"></i>Nuevo Cliente</h4>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Create" method="post" autocomplete="off">
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+                        <h5 class="mb-3 text-muted"><i class="bi bi-person me-2"></i>Datos Personales</h5>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label asp-for="Nombres" class="form-label"></label>
+                                <input asp-for="Nombres" class="form-control" id="Nombres" />
+                                <span asp-validation-for="Nombres" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="Apellidos" class="form-label"></label>
+                                <input asp-for="Apellidos" class="form-control" id="Apellidos" />
+                                <span asp-validation-for="Apellidos" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label asp-for="Email" class="form-label"></label>
+                                <input asp-for="Email" class="form-control" type="email" />
+                                <span asp-validation-for="Email" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="Celular" class="form-label"></label>
+                                <input asp-for="Celular" class="form-control" id="Celular" maxlength="9" />
+                                <span asp-validation-for="Celular" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label asp-for="Contrasenia" class="form-label"></label>
+                                <div class="input-group">
+                                    <input asp-for="Contrasenia" type="password" class="form-control" id="Contrasenia" />
+                                    <button class="btn btn-outline-secondary" type="button" onclick="togglePassword('Contrasenia', 'iconContrasenia')">
+                                        <i class="bi bi-eye" id="iconContrasenia"></i>
+                                    </button>
+                                </div>
+                                <span asp-validation-for="Contrasenia" class="text-danger"></span>
+                                <div id="contrasenaFeedback"></div>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="ConfirmarContrasenia" class="form-label"></label>
+                                <div class="input-group">
+                                    <input asp-for="ConfirmarContrasenia" type="password" class="form-control" id="ConfirmarContrasenia" />
+                                    <button class="btn btn-outline-secondary" type="button" onclick="togglePassword('ConfirmarContrasenia', 'iconConfirmar')">
+                                        <i class="bi bi-eye" id="iconConfirmar"></i>
+                                    </button>
+                                </div>
+                                <span asp-validation-for="ConfirmarContrasenia" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <hr class="my-4" />
+
+                        <h5 class="mb-3 text-muted"><i class="bi bi-geo-alt me-2"></i>Datos de Ubicación</h5>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label asp-for="DniRuc" class="form-label"></label>
+                                <input asp-for="DniRuc" class="form-control" id="DniRuc" maxlength="11" />
+                                <span asp-validation-for="DniRuc" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="FechaNacimiento" class="form-label"></label>
+                                <input asp-for="FechaNacimiento" class="form-control" type="date" max="@DateTime.Now.AddYears(-18).ToString("yyyy-MM-dd")" min="@DateTime.Now.AddYears(-120).ToString("yyyy-MM-dd")" />
+                                <span asp-validation-for="FechaNacimiento" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Direccion" class="form-label"></label>
+                            <input asp-for="Direccion" class="form-control" id="Direccion" />
+                            <span asp-validation-for="Direccion" class="text-danger"></span>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label asp-for="Ciudad" class="form-label"></label>
+                                <input asp-for="Ciudad" class="form-control" id="Ciudad" />
+                                <span asp-validation-for="Ciudad" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="CodigoPostal" class="form-label"></label>
+                                <input asp-for="CodigoPostal" class="form-control" id="CodigoPostal" maxlength="6" />
+                                <span asp-validation-for="CodigoPostal" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between mt-4">
+                            <a asp-action="Index" class="btn btn-secondary">
+                                <i class="bi bi-x-lg me-1"></i>Cancelar
+                            </a>
+                            <button type="submit" class="btn text-white" style="background-color: #f1149b;">
+                                <i class="bi bi-check-lg me-1"></i>Guardar
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script src="~/js/validaciones.js"></script>
+    <script>
+        function togglePassword(inputId, iconId) {
+            var input = document.getElementById(inputId);
+            var icon = document.getElementById(iconId);
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('bi-eye');
+                icon.classList.add('bi-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('bi-eye-slash');
+                icon.classList.add('bi-eye');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            ValidacionesYUNAN.validarContrasenaEnTiempoReal('Contrasenia', 'contrasenaFeedback');
+
+            ValidacionesYUNAN.validarPorId('Nombres', 'soloLetras');
+            ValidacionesYUNAN.validarPorId('Apellidos', 'soloLetras');
+            ValidacionesYUNAN.validarPorId('Celular', 'soloNumeros');
+            ValidacionesYUNAN.validarPorId('DniRuc', 'soloNumeros');
+            ValidacionesYUNAN.validarPorId('Direccion', 'direccion');
+            ValidacionesYUNAN.validarPorId('Ciudad', 'soloLetras');
+            ValidacionesYUNAN.validarPorId('CodigoPostal', 'soloNumeros');
+        });
+    </script>
+}

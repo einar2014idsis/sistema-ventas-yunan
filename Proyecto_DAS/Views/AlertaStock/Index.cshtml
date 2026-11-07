@@ -1,0 +1,199 @@
+@model IEnumerable<Proyecto_DAS.ViewModels.AlertaStock.AlertaStockViewModel>
+@{
+    ViewData["Title"] = "Alertas de Stock";
+    var filtros = ViewBag.Filtros as Proyecto_DAS.ViewModels.AlertaStock.AlertaStockFilterViewModel;
+}
+
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <h1 class="display-4">@ViewData["Title"]</h1>
+            <hr />
+        </div>
+    </div>
+
+    <div class="row mb-3">
+        <div class="col-md-12 d-flex justify-content-between">
+            <a asp-controller="Home" asp-action="PanelAdministrador" class="btn btn-secondary">
+                <i class="bi bi-arrow-left-circle"></i> Volver al Panel
+            </a>
+        </div>
+    </div>
+
+    <!-- Formulario de Filtros -->
+    <div class="card mb-4" style="background-color: #f8cde7;">
+        <div class="card-header" style="background-color: #f1149b; color: white;">
+            <h5 class="mb-0"><i class="bi bi-funnel-fill"></i> Filtros de Busqueda</h5>
+        </div>
+        <div class="card-body">
+            <form method="get" asp-action="Index" autocomplete="off" id="formFiltrosAlerta" onsubmit="return validarFechasAlerta()">
+                <div class="row">
+                    <div class="col-md-3">
+                        <label for="Estado" class="form-label">Estado</label>
+                        <select name="Estado" class="form-select">
+                            <option value="">-- Todos --</option>
+                            <option value="Pendiente" selected="@(filtros?.Estado == "Pendiente")">Pendientes</option>
+                            <option value="Resuelta" selected="@(filtros?.Estado == "Resuelta")">Resueltas</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="ProductoId" class="form-label">Producto</label>
+                        <select name="ProductoId" class="form-select">
+                            <option value="">-- Todos --</option>
+                            @if (ViewBag.Productos != null)
+                            {
+                                @foreach (var producto in ViewBag.Productos)
+                                {
+                                    <option value="@producto.IdProducto" selected="@(filtros?.ProductoId == producto.IdProducto)">
+                                        @producto.Nombre
+                                    </option>
+                                }
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label for="FechaDesde" class="form-label">Desde</label>
+                        <input type="date" id="FechaDesde" name="FechaDesde" class="form-control"
+                               value="@filtros?.FechaDesde?.ToString("yyyy-MM-dd")"
+                               min="2025-01-01" max="@DateTime.Now.ToString("yyyy-MM-dd")" />
+                    </div>
+                    <div class="col-md-2">
+                        <label for="FechaHasta" class="form-label">Hasta</label>
+                        <input type="date" id="FechaHasta" name="FechaHasta" class="form-control"
+                               value="@filtros?.FechaHasta?.ToString("yyyy-MM-dd")"
+                               min="2025-01-01" max="@DateTime.Now.ToString("yyyy-MM-dd")" />
+                    </div>
+                    <div class="col-md-2 d-flex align-items-end">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="bi bi-search"></i> Buscar
+                        </button>
+                    </div>
+                </div>
+                <div class="row mt-2">
+                    <div class="col-md-12">
+                        <a asp-action="Index" class="btn btn-secondary btn-sm">
+                            <i class="bi bi-x-circle"></i> Limpiar filtros
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Mensajes de TempData -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle-fill"></i> @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-circle-fill"></i> @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+    @if (TempData["InfoMessage"] != null)
+    {
+        <div class="alert alert-info alert-dismissible fade show" role="alert">
+            <i class="bi bi-info-circle-fill"></i> @TempData["InfoMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <!-- Tabla de Alertas -->
+    <div class="card">
+        <div class="card-header" style="background-color: #f1149b; color: white;">
+            <h5 class="mb-0"><i class="bi bi-list-ul"></i> Listado de Alertas</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+            <table class="table table-bordered table-striped table-hover">
+                <thead class="table-dark">
+                    <tr>
+                        <th><i class="bi bi-box-seam"></i> Producto</th>
+                        <th><i class="bi bi-rulers"></i> Talla</th>
+                        <th><i class="bi bi-palette"></i> Color</th>
+                        <th><i class="bi bi-arrow-down-circle"></i> Stock Actual</th>
+                        <th><i class="bi bi-arrow-up-circle"></i> Stock Minimo</th>
+                        <th><i class="bi bi-calendar-event"></i> Fecha Generación</th>
+                        <th><i class="bi bi-calendar-check"></i> Fecha Resolución</th>
+                        <th><i class="bi bi-flag-fill"></i> Estado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Any())
+                    {
+                        @foreach (var item in Model)
+                        {
+                            <tr class="@(item.Estado == "Pendiente" ? "table-warning" : "")">
+                                <td><strong>@item.ProductoNombre</strong></td>
+                                <td>@item.Talla</td>
+                                <td>@item.Color</td>
+                                <td>
+                                    <span class="badge @(item.StockActual <= item.StockMinimo ? "bg-danger" : "bg-success")">
+                                        @item.StockActual
+                                    </span>
+                                </td>
+                                <td>@item.StockMinimo</td>
+                                <td>@item.FechaAlerta.ToString("dd/MM/yyyy HH:mm")</td>
+                                <td>
+                                    @if (item.FechaResolucion.HasValue)
+                                    {
+                                        <span class="text-success">@item.FechaResolucion.Value.ToString("dd/MM/yyyy HH:mm")</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">-</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (item.Estado == "Resuelta")
+                                    {
+                                        <span class="badge bg-success">
+                                            <i class="bi bi-check-circle-fill"></i> Resuelta
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-danger">
+                                            <i class="bi bi-exclamation-circle-fill"></i> Pendiente
+                                        </span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="8" class="text-center text-muted">
+                                <i class="bi bi-inbox"></i> No se encontraron alertas con los filtros aplicados.
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function validarFechasAlerta() {
+            var fechaDesde = document.getElementById('FechaDesde').value;
+            var fechaHasta = document.getElementById('FechaHasta').value;
+
+            if (fechaDesde && fechaHasta) {
+                if (new Date(fechaDesde) > new Date(fechaHasta)) {
+                    alert('La fecha "Desde" no puede ser mayor a la fecha "Hasta".');
+                    return false;
+                }
+            }
+            return true;
+        }
+    </script>
+}

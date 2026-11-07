@@ -1,0 +1,638 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - YUNAN Fashion</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Montserrat:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+
+    <style>
+        :root {
+            --brand-primary: #f1149b;
+            --brand-dark: #c00e7a;
+            --brand-light: #ffeef6;
+            --text-dark: #182036;
+            --neo-border: #f4e3ed;
+            --neo-gradient: linear-gradient(120deg, #ff38ad, #f1149b 55%, #d20b85);
+        }
+
+        html, body {
+            min-height: 100%;
+            margin: 0;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            font-family: 'DM Sans', 'Montserrat', sans-serif;
+            color: var(--text-dark);
+            background: #fffafd;
+        }
+
+        .brand-font {
+            font-family: 'Playfair Display', serif;
+        }
+
+        .content-wrapper {
+            flex: 1 0 auto;
+            padding-bottom: 3rem;
+        }
+
+        /* ENCABEZADO NEO FASHION */
+
+        .navbar-custom {
+            background: rgba(255, 255, 255, 0.96);
+            border-bottom: 1px solid var(--neo-border);
+            box-shadow: 0 6px 30px rgba(140, 35, 95, 0.06);
+            padding: 12px 0;
+            position: relative;
+            z-index: 1020;
+        }
+
+        .navbar-custom .container {
+            max-width: 1400px;
+        }
+
+        .neo-brand {
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            text-decoration: none;
+            min-width: 125px;
+            line-height: 1;
+        }
+
+        .neo-brand-crown {
+            color: var(--brand-primary);
+            font-size: 23px;
+            line-height: 1;
+        }
+
+        .navbar-brand-text {
+            font-family: 'Playfair Display', serif;
+            color: var(--brand-primary) !important;
+            font-size: 28px;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+
+        .neo-brand-subtitle {
+            color: #5f5260;
+            font-size: 10px;
+            margin-top: 5px;
+            letter-spacing: 1px;
+        }
+
+        .neo-nav-link {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 11px 16px;
+            border-radius: 14px;
+            color: #303348;
+            font-size: 13px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: background .25s, color .25s, transform .25s;
+        }
+
+        .neo-nav-link:hover {
+            background: var(--brand-light);
+            color: var(--brand-primary);
+            transform: translateY(-2px);
+        }
+
+        .neo-nav-link.active {
+            background: linear-gradient(120deg, #fff0f8, #ffe0f0);
+            color: var(--brand-primary);
+        }
+
+        .neo-nav-link i {
+            font-size: 17px;
+        }
+
+        .neo-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .neo-account {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 11px 17px;
+            color: #323047;
+            background: #fff;
+            border: 1px solid #efdce8;
+            border-radius: 50px;
+            font-size: 13px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all .25s ease;
+        }
+
+        .neo-account:hover {
+            color: var(--brand-primary);
+            background: #fff2f9;
+            border-color: #f9a7d7;
+            transform: translateY(-2px);
+        }
+
+        .neo-user {
+            font-size: 12px;
+            color: #64586a;
+            font-weight: 600;
+            max-width: 180px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .btn-cart {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 9px;
+            padding: 12px 23px;
+            border: none;
+            border-radius: 50px;
+            background: var(--neo-gradient);
+            color: white !important;
+            font-size: 13px;
+            font-weight: 700;
+            text-decoration: none;
+            box-shadow: 0 8px 22px rgba(241, 20, 155, .20);
+            transition: transform .25s, box-shadow .25s;
+        }
+
+        .btn-cart:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 28px rgba(241, 20, 155, .30);
+        }
+
+        .btn-cart i {
+            font-size: 18px;
+        }
+
+        .cart-badge {
+            position: absolute;
+            top: -7px;
+            right: -7px;
+            background: #fff !important;
+            color: var(--brand-primary);
+            border: 2px solid var(--brand-primary);
+            border-radius: 50px;
+            padding: 4px 7px;
+            font-size: 10px;
+        }
+
+        .neo-toggler {
+            border: 1px solid #f5d4e7;
+            border-radius: 13px;
+            color: var(--brand-primary);
+            padding: 7px 12px;
+            background: white;
+        }
+
+        .neo-toggler:focus {
+            box-shadow: 0 0 0 3px rgba(241,20,155,.12);
+        }
+
+        /* ALERTAS */
+
+        .alert {
+            border: none;
+            border-radius: 16px;
+            box-shadow: 0 5px 20px rgba(0,0,0,.05);
+        }
+
+        /* FOOTER */
+
+        .neo-footer {
+            background: linear-gradient(180deg, #fff, #fff4fa);
+            border-top: 1px solid #f7e0ed;
+            flex-shrink: 0;
+        }
+
+        .neo-footer-title {
+            color: var(--brand-primary);
+            font-size: 30px;
+            font-weight: 700;
+        }
+
+        .neo-footer-description {
+            color: #797181;
+            font-size: 13px;
+            max-width: 400px;
+            line-height: 1.8;
+        }
+
+        .footer-social-link {
+            width: 44px;
+            height: 44px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: white;
+            border: 1px solid #f5d6e8;
+            color: var(--brand-primary);
+            text-decoration: none;
+            transition: all .3s ease;
+        }
+
+        .footer-social-link:hover {
+            color: white;
+            background: var(--brand-primary);
+            transform: translateY(-4px);
+            box-shadow: 0 7px 20px rgba(241,20,155,.2);
+        }
+
+        .copyright-bar {
+            border-top: 1px solid #f1dce7;
+            color: #817683;
+            font-size: 12px;
+        }
+
+        /* RESPONSIVE */
+
+        @@media (max-width: 1199.98px) {
+            .neo-nav-link {
+                padding: 10px 11px;
+                font-size: 12px;
+            }
+
+            .neo-account {
+                padding: 10px 12px;
+            }
+        }
+
+        @@media (max-width: 991.98px) {
+            .navbar-custom {
+                padding: 10px 0;
+            }
+
+            #navbarMain {
+                margin-top: 15px;
+                padding: 15px;
+                background: #fff;
+                border: 1px solid #f7e1ed;
+                border-radius: 20px;
+                box-shadow: 0 10px 30px rgba(0,0,0,.04);
+            }
+
+            .neo-navigation {
+                flex-direction: column;
+                align-items: stretch !important;
+                width: 100%;
+            }
+
+            .neo-nav-link {
+                justify-content: flex-start;
+                padding: 13px 15px;
+                width: 100%;
+            }
+
+            .neo-actions {
+                flex-wrap: wrap;
+                justify-content: center;
+                width: 100%;
+                padding-top: 15px;
+                border-top: 1px solid #f7e8ef;
+            }
+
+            .neo-user {
+                max-width: 100%;
+            }
+        }
+
+        @@media (max-width: 575.98px) {
+            .navbar-brand-text {
+                font-size: 24px;
+            }
+
+            .neo-brand {
+                min-width: 105px;
+            }
+
+            .neo-footer {
+                text-align: center;
+            }
+
+            .neo-footer-description {
+                margin-left: auto;
+                margin-right: auto;
+            }
+
+            .content-wrapper {
+                padding-bottom: 2rem;
+            }
+        }
+
+        @@media (prefers-reduced-motion: reduce) {
+            .neo-nav-link,
+            .neo-account,
+            .btn-cart,
+            .footer-social-link {
+                transition: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-custom">
+            <div class="container">
+
+                <a asp-controller="ClientePanel"
+                   asp-action="Index"
+                   class="neo-brand">
+
+                    <i class="bi bi-gem neo-brand-crown"></i>
+
+                    <span class="navbar-brand-text">
+                        YUNAN
+                    </span>
+
+                    <span class="neo-brand-subtitle">
+                        — Brilla Bonito —
+                    </span>
+                </a>
+
+                <button class="navbar-toggler neo-toggler"
+                        type="button"
+                        data-bs-toggle="collapse"
+                        data-bs-target="#navbarMain"
+                        aria-controls="navbarMain"
+                        aria-expanded="false"
+                        aria-label="Abrir menú de navegación">
+                    <i class="bi bi-list fs-4"></i>
+                </button>
+
+                <div class="collapse navbar-collapse" id="navbarMain">
+
+                    <div class="d-flex align-items-center gap-1 ms-lg-4 me-auto neo-navigation">
+
+                        <a asp-controller="ClientePanel"
+                           asp-action="Index"
+                           class="neo-nav-link active">
+                            <i class="bi bi-grid"></i>
+                            Colección
+                        </a>
+
+                    </div>
+
+                    <div class="neo-actions">
+
+                        @if (Context.Session.GetInt32("UsuarioId") != null)
+                        {
+                            <span class="neo-user">
+                                <i class="bi bi-person-circle me-1"></i>
+                                Hola, @Context.Session.GetString("NombreUsuario")
+                            </span>
+
+                            @if (Context.Session.GetString("Rol") == "Cliente")
+                            {
+                                <a asp-controller="ClientePanel"
+                                   asp-action="MisCompras"
+                                   class="neo-account">
+                                    <i class="bi bi-bag-heart"></i>
+                                    Mis Compras
+                                </a>
+                            }
+
+                            <a asp-controller="Auth"
+                               asp-action="Logout"
+                               class="neo-account">
+                                <i class="bi bi-box-arrow-right"></i>
+                                Salir
+                            </a>
+                        }
+                        else
+                        {
+                            <a asp-controller="Auth"
+                               asp-action="Login"
+                               class="neo-account">
+                                <i class="bi bi-person"></i>
+                                Iniciar Sesión
+                            </a>
+                        }
+
+                        <a asp-controller="Carrito"
+                           asp-action="Index"
+                           class="btn-cart">
+                            <i class="bi bi-bag"></i>
+                            <span>Carrito</span>
+
+                            <span id="carritoCount"
+                                  class="badge cart-badge"
+                                  style="display: none;">
+                                0
+                            </span>
+                        </a>
+
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <div class="container mt-4">
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show d-flex align-items-center"
+                 role="alert">
+                <i class="bi bi-check-circle-fill fs-4 me-3 text-success"></i>
+                <div>@TempData["SuccessMessage"]</div>
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="alert"
+                        aria-label="Cerrar"></button>
+            </div>
+        }
+
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show d-flex align-items-center"
+                 role="alert">
+                <i class="bi bi-exclamation-triangle-fill fs-4 me-3 text-danger"></i>
+                <div>@TempData["ErrorMessage"]</div>
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="alert"
+                        aria-label="Cerrar"></button>
+            </div>
+        }
+    </div>
+
+    <div class="content-wrapper">
+        @RenderBody()
+    </div>
+
+    <footer class="neo-footer">
+        <div class="container py-5">
+            <div class="row align-items-center gy-4">
+
+                <div class="col-md-6 text-center text-md-start">
+                    <h4 class="brand-font neo-footer-title mb-2">
+                        YUNAN
+                    </h4>
+
+                    <p class="neo-footer-description mb-0">
+                        Brilla Bonito. Moda que te acompaña en cada momento.
+                        Descubre prendas con estilo, calidad y comodidad.
+                    </p>
+                </div>
+
+                <div class="col-md-6 text-center text-md-end">
+                    <h6 class="fw-bold mb-3"
+                        style="font-size: 12px; letter-spacing: 1.5px;">
+                        SÍGUENOS EN REDES
+                    </h6>
+
+                    <div class="d-flex justify-content-center justify-content-md-end gap-3">
+
+                        <a href="https://www.facebook.com/share/1Bg3TRxmxN/"
+                           target="_blank"
+                           rel="noopener noreferrer"
+                           class="footer-social-link"
+                           aria-label="Facebook">
+                            <i class="bi bi-facebook fs-5"></i>
+                        </a>
+
+                        <a href="https://www.tiktok.com/@@yunan338?_r=1&_t=ZS-91Ysc4FVGaN"
+                           target="_blank"
+                           rel="noopener noreferrer"
+                           class="footer-social-link"
+                           aria-label="TikTok">
+                            <i class="bi bi-tiktok fs-5"></i>
+                        </a>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="copyright-bar py-3 text-center">
+            <div class="container">
+                <small>
+                    © @DateTime.Now.Year Yunan Fashion Store.
+                    Todos los derechos reservados.
+                </small>
+            </div>
+        </div>
+    </footer>
+
+    <div aria-live="polite"
+         aria-atomic="true"
+         class="position-relative">
+
+        <div id="toastContainer"
+             class="toast-container position-fixed bottom-0 end-0 p-3"
+             style="z-index: 1050;">
+
+            <div id="successToast"
+                 class="toast text-white bg-success border-0 shadow-lg"
+                 role="alert"
+                 aria-live="assertive"
+                 aria-atomic="true"
+                 data-bs-delay="4000">
+
+                <div class="d-flex align-items-center p-2">
+                    <i class="bi bi-check-circle-fill fs-4 ms-2"></i>
+                    <div class="toast-body fw-medium"></div>
+                    <button type="button"
+                            class="btn-close btn-close-white me-2 m-auto"
+                            data-bs-dismiss="toast"
+                            aria-label="Cerrar"></button>
+                </div>
+            </div>
+
+            <div id="errorToast"
+                 class="toast text-white bg-danger border-0 shadow-lg"
+                 role="alert"
+                 aria-live="assertive"
+                 aria-atomic="true"
+                 data-bs-delay="4000">
+
+                <div class="d-flex align-items-center p-2">
+                    <i class="bi bi-x-circle-fill fs-4 ms-2"></i>
+                    <div class="toast-body fw-medium"></div>
+                    <button type="button"
+                            class="btn-close btn-close-white me-2 m-auto"
+                            data-bs-dismiss="toast"
+                            aria-label="Cerrar"></button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        function showToast(message, type = 'success') {
+            let toastElement = type === 'success'
+                ? $('#successToast')
+                : $('#errorToast');
+
+            toastElement.find('.toast-body').text(message);
+
+            const toastBootstrap =
+                bootstrap.Toast.getOrCreateInstance(toastElement[0]);
+
+            toastBootstrap.show();
+        }
+
+        function actualizarContadorCarrito() {
+            $.get('/Carrito/ObtenerCantidad', function (data) {
+                if (data.cantidad > 0) {
+                    let badge = $('#carritoCount');
+
+                    badge.text(data.cantidad)
+                         .show()
+                         .addClass('animate__animated animate__bounceIn');
+
+                    setTimeout(() => {
+                        badge.removeClass(
+                            'animate__animated animate__bounceIn'
+                        );
+                    }, 1000);
+                } else {
+                    $('#carritoCount').hide();
+                }
+            });
+        }
+
+        $(document).ready(function () {
+            actualizarContadorCarrito();
+
+            var tooltipTriggerList = [].slice.call(
+                document.querySelectorAll('[data-bs-toggle="tooltip"]')
+            );
+
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+        });
+    </script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+
+</body>
+</html>

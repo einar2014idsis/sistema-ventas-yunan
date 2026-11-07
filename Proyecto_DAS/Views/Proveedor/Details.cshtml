@@ -1,0 +1,63 @@
+@model Proyecto_DAS.ViewModels.Proveedor.ProveedorViewModel
+
+@{
+    ViewData["Title"] = "Detalles del Proveedor";
+}
+
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <h1 class="display-4">@ViewData["Title"]</h1>
+            <hr />
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card shadow">
+                <div class="card-body">
+                    <dl class="row">
+                        <dt class="col-sm-3">ID</dt>
+                        <dd class="col-sm-9">@Html.DisplayFor(model => model.IdProveedor)</dd>
+
+                        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.NombreEmpresa)</dt>
+                        <dd class="col-sm-9">@Html.DisplayFor(model => model.NombreEmpresa)</dd>
+
+                        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.ContactoNombre)</dt>
+                        <dd class="col-sm-9">@Html.DisplayFor(model => model.ContactoNombre)</dd>
+
+                        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Celular)</dt>
+                        <dd class="col-sm-9">@Html.DisplayFor(model => model.Celular)</dd>
+
+                        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Email)</dt>
+                        <dd class="col-sm-9">@Html.DisplayFor(model => model.Email)</dd>
+
+                        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Direccion)</dt>
+                        <dd class="col-sm-9">@Html.DisplayFor(model => model.Direccion)</dd>
+
+                        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Ruc)</dt>
+                        <dd class="col-sm-9">@Html.DisplayFor(model => model.Ruc)</dd>
+
+                        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Estado)</dt>
+                        <dd class="col-sm-9">
+                            @if (Model.Estado)
+                            {
+                                <span class="badge bg-success">Activo</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary">Inactivo</span>
+                            }
+                        </dd>
+                    </dl>
+
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                        <a asp-action="Index" class="btn btn-secondary me-md-2">
+                            <i class="bi bi-arrow-left-circle-fill"></i> Volver al listado
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
