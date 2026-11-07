@@ -1,0 +1,180 @@
+@model List<Proyecto_DAS.ViewModels.Administrador.AdministradorViewModel>
+@{
+    ViewData["Title"] = "Administradores";
+    Layout = "_LayoutAdmin";
+}
+
+<style>
+    .user-avatar {
+        width: 40px;
+        height: 40px;
+        background-color: #f1f5f9;
+        color: #64748b;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+    }
+
+    .table-hover tbody tr:hover {
+        background-color: #f8fafc;
+    }
+
+    .table thead th {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-weight: 600;
+        color: #94a3b8;
+        border-bottom-width: 1px;
+        padding-top: 1rem;
+        padding-bottom: 1rem;
+    }
+
+    .btn-action {
+        width: 32px;
+        height: 32px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 6px;
+        color: #64748b;
+        transition: all 0.2s;
+        border: 1px solid transparent;
+        background: transparent;
+    }
+
+        .btn-action:hover {
+            background-color: #f1f5f9;
+            color: var(--admin-accent);
+        }
+
+        .btn-action.delete:hover {
+            background-color: #fee2e2;
+            color: #ef4444;
+        }
+</style>
+
+<div class="container-fluid px-4 mt-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h3 class="fw-bold mb-1">Equipo Administrativo</h3>
+            <p class="text-muted small mb-0">Gestiona los accesos y roles del sistema.</p>
+        </div>
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <a asp-controller="Home" asp-action="PanelAdministrador" class="btn btn-secondary">
+                <i class="bi bi-arrow-left"></i> Volver al Panel
+            </a>
+        </div>
+
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show border-0 shadow-sm" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i>@TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="card border-0 shadow-sm" style="border-radius: 12px; overflow: hidden;">
+        <div class="card-body p-0">
+            @if (!Model.Any())
+            {
+                <div class="text-center py-5">
+                    <div class="mb-3">
+                        <i class="bi bi-people text-muted opacity-25" style="font-size: 4rem;"></i>
+                    </div>
+                    <h5 class="fw-bold text-muted">No hay administradores registrados</h5>
+                    <p class="text-muted small">Comienza agregando un nuevo miembro al equipo.</p>
+                </div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table align-middle mb-0">
+                        <thead class="bg-light">
+                            <tr>
+                                <th class="ps-4">Administrador</th>
+                                <th>Cargo</th>
+                                <th>Contacto</th>
+                                <th>Estado</th>
+                                <th class="text-end pe-4">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var admin in Model)
+                            {
+                                var iniciales = "";
+                                if (!string.IsNullOrEmpty(admin.Nombres) && !string.IsNullOrEmpty(admin.Apellidos))
+                                {
+                                    iniciales = $"{admin.Nombres.Substring(0, 1)}{admin.Apellidos.Substring(0, 1)}";
+                                }
+
+                                <tr>
+                                    <td class="ps-4 py-3">
+                                        <div class="d-flex align-items-center">
+                                            <div class="user-avatar me-3">
+                                                @iniciales
+                                            </div>
+                                            <div>
+                                                <div class="fw-bold text-dark">@admin.Nombres @admin.Apellidos</div>
+                                                <div class="small text-muted">@admin.Email</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-light text-dark border fw-normal px-3 py-2">
+                                            <i class="bi bi-briefcase me-1 text-muted"></i> @admin.Cargo
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="small text-muted">
+                                            <i class="bi bi-telephone me-1"></i> @(string.IsNullOrEmpty(admin.Celular) ? "-" : admin.Celular)
+                                        </div>
+                                        <div class="small text-muted" style="font-size: 0.75rem;">
+                                            Contratado: @admin.FechaContratacion.ToString("dd MMM yyyy")
+                                        </div>
+                                    </td>
+                                    <td>
+                                        @if (admin.Estado)
+                                        {
+                                            <span class="badge rounded-pill bg-success bg-opacity-10 text-success px-3">Activo</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge rounded-pill bg-danger bg-opacity-10 text-danger px-3">Inactivo</span>
+                                        }
+                                    </td>
+                                    <td class="text-end pe-4">
+                                        <div class="d-flex gap-1 justify-content-end">
+                                            <a asp-action="Details" asp-route-id="@admin.IdAdministrador" class="btn-action" data-bs-toggle="tooltip" title="Ver Detalle">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                            <a asp-action="Edit" asp-route-id="@admin.IdAdministrador" class="btn-action" data-bs-toggle="tooltip" title="Editar">
+                                                <i class="bi bi-pencil-square"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+          return new bootstrap.Tooltip(tooltipTriggerEl)
+        })
+    </script>
+}

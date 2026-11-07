@@ -1,0 +1,199 @@
+@model Proyecto_DAS.ViewModels.Administrador.AdministradorEditViewModel
+@{
+    ViewData["Title"] = "Editar Administrador";
+    Layout = "_LayoutAdmin";
+}
+
+<style>
+    .form-section-title {
+        font-size: 0.85rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: #94a3b8;
+        margin-bottom: 1.5rem;
+        border-bottom: 1px solid #f1f5f9;
+        padding-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .form-control:focus, .form-select:focus, .form-check-input:checked {
+        border-color: #f1149b;
+        box-shadow: 0 0 0 0.25rem rgba(241, 20, 155, 0.15);
+    }
+
+    .form-check-input:checked {
+        background-color: #f1149b;
+        border-color: #f1149b;
+    }
+
+    .card-form {
+        border: none;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        border-radius: 12px;
+    }
+
+    .password-update-box {
+        background-color: #fff9fc;
+        border: 1px dashed #f8cde7;
+        border-radius: 8px;
+        padding: 1.5rem;
+    }
+
+    .status-card {
+        background-color: #f8fafc;
+        border-radius: 8px;
+        padding: 1rem;
+        border: 1px solid #e2e8f0;
+        transition: all 0.3s;
+    }
+
+        .status-card.active {
+            border-color: #cbd5e1;
+            background-color: #fff;
+        }
+</style>
+
+<div class="container mt-4 mb-5">
+
+    <div class="row justify-content-center mb-4">
+        <div class="col-lg-8">
+            <div class="d-flex align-items-center justify-content-between">
+                <div class="d-flex align-items-center gap-3">
+                    <a asp-action="Index" class="btn btn-light border shadow-sm rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                        <i class="bi bi-arrow-left"></i>
+                    </a>
+                    <div>
+                        <h4 class="fw-bold mb-0">Editar Administrador</h4>
+                        <p class="text-muted small mb-0">Actualizando datos de: <span class="fw-bold text-dark">@Model.Nombres @Model.Apellidos</span></p>
+                    </div>
+                </div>
+                <span class="badge bg-light text-muted border d-none d-md-inline-block">ID: @Model.IdAdministrador</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card card-form bg-white">
+                <div class="card-body p-4 p-md-5">
+
+                    <form asp-action="Edit" method="post" autocomplete="off">
+                        <input type="hidden" asp-for="IdAdministrador" />
+                        <input type="hidden" asp-for="UsuarioId" />
+
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger rounded-3 border-0 shadow-sm mb-4" role="alert"></div>
+
+                        <div class="form-section-title mt-1">
+                            <i class="bi bi-person-vcard"></i> Información Personal
+                        </div>
+
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label asp-for="Nombres" class="form-label">Nombres</label>
+                                <input asp-for="Nombres" class="form-control" id="Nombres" />
+                                <span asp-validation-for="Nombres" class="text-danger small"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="Apellidos" class="form-label">Apellidos</label>
+                                <input asp-for="Apellidos" class="form-control" id="Apellidos" />
+                                <span asp-validation-for="Apellidos" class="text-danger small"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="Email" class="form-label">Correo Electrónico</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light"><i class="bi bi-envelope text-muted"></i></span>
+                                    <input asp-for="Email" class="form-control" />
+                                </div>
+                                <span asp-validation-for="Email" class="text-danger small"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="Celular" class="form-label">Celular</label>
+                                <input asp-for="Celular" class="form-control" id="Celular" maxlength="9" />
+                                <span asp-validation-for="Celular" class="text-danger small"></span>
+                            </div>
+                        </div>
+
+                        <div class="form-section-title">
+                            <i class="bi bi-briefcase"></i> Perfil Laboral
+                        </div>
+
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label asp-for="FechaContratacion" class="form-label">Fecha de Contratación</label>
+                                <input asp-for="FechaContratacion" class="form-control" type="date" />
+                                <span asp-validation-for="FechaContratacion" class="text-danger small"></span>
+                            </div>
+                        </div>
+
+                        <div class="password-update-box mb-4">
+                            <div class="d-flex align-items-center mb-3 text-dark">
+                                <i class="bi bi-shield-lock-fill fs-5 me-2" style="color: #f1149b;"></i>
+                                <h6 class="fw-bold mb-0">Actualizar Contraseña</h6>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-12">
+                                    <label asp-for="NuevaContrasenia" class="form-label small text-muted">Nueva Contraseña (Opcional)</label>
+                                    <div class="input-group">
+                                        <input asp-for="NuevaContrasenia" class="form-control" type="password" id="inputPass" placeholder="Dejar en blanco para mantener la actual" autocomplete="new-password" />
+                                        <button class="btn btn-outline-secondary bg-white" type="button" onclick="togglePassword()">
+                                            <i class="bi bi-eye" id="toggleIcon"></i>
+                                        </button>
+                                    </div>
+                                    <div class="form-text mt-1 text-muted" style="font-size: 0.8rem;">
+                                        <i class="bi bi-info-circle me-1"></i> Solo llena este campo si deseas cambiar la contraseña del usuario.
+                                    </div>
+                                    <span asp-validation-for="NuevaContrasenia" class="text-danger small"></span>
+                                    <div id="contrasenaFeedback"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr class="my-4" />
+
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="d-flex gap-2">
+                                <a asp-action="Index" class="btn btn-light border px-4">Cancelar</a>
+                                <button type="submit" class="btn text-white px-4" style="background-color: #f1149b;">
+                                    <i class="bi bi-save me-2"></i> Guardar Cambios
+                                </button>
+                            </div>
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script src="~/js/validaciones.js"></script>
+    <script>
+        function togglePassword() {
+            const input = document.getElementById('inputPass');
+            const icon = document.getElementById('toggleIcon');
+
+            if (input.type === "password") {
+                input.type = "text";
+                icon.classList.remove('bi-eye');
+                icon.classList.add('bi-eye-slash');
+            } else {
+                input.type = "password";
+                icon.classList.remove('bi-eye-slash');
+                icon.classList.add('bi-eye');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            ValidacionesYUNAN.validarContrasenaEnTiempoReal('inputPass', 'contrasenaFeedback');
+            ValidacionesYUNAN.validarPorId('Nombres', 'soloLetras');
+            ValidacionesYUNAN.validarPorId('Apellidos', 'soloLetras');
+            ValidacionesYUNAN.validarPorId('Celular', 'soloNumeros');
+        });
+    </script>
+}
