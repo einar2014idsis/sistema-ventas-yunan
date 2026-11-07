@@ -1,0 +1,36 @@
+<link rel="stylesheet" href="~/css/dashboard-ventas.css" asp-append-version="true" />
+<div id="analiticaVentas" data-url="@Url.Action("DatosDashboard", "Venta")" data-excel="@Url.Action("GenerarReporteExcel", "Venta")">
+    <div class="analitica-toolbar">
+        <div><span class="analitica-eyebrow">YUNAN · INTELIGENCIA COMERCIAL</span><h2>Centro de Inteligencia Comercial</h2><p>Analiza tus ventas, identifica oportunidades y toma mejores decisiones.</p></div>
+        <div class="analitica-controls">
+            <label>Periodo <select id="periodoAnalitica"><option value="all">Todo el historial</option><option value="today">Hoy</option><option value="7">Últimos 7 días</option><option value="30">Últimos 30 días</option><option value="90">Últimos 90 días</option><option value="month">Este mes</option><option value="year">Este año</option><option value="custom">Rango personalizado</option></select></label>
+            <button type="button" id="actualizarAnalitica" class="btn btn-light">Actualizar</button>
+            <button type="button" id="resetAnalitica" class="btn btn-light">Restablecer filtros</button>
+            <button type="button" id="excelAnalitica" class="btn btn-primary"><i class="bi bi-download"></i> Descargar Excel</button>
+        </div>
+    </div>
+    <div class="analitica-notice">Los ingresos por producto y categoría se distribuyen proporcionalmente al importe de cada detalle. Las cifras incluyen los estados de pago registrados, igual que el reporte actual.</div>
+    <div id="dashboardLoading" class="analitica-status" role="status">Cargando información…</div>
+    <div id="dashboardError" class="analitica-error" role="alert" hidden></div>
+    <div id="dashboardContent" hidden>
+        <div id="dashboardSelection" class="selection" hidden></div>
+        <div id="kpisAnalitica" class="kpi-grid"></div>
+        <div class="analytic-grid main-grid">
+            <section class="analytic-card"><div class="analytic-heading"><div><h3>Evolución de ingresos</h3><p>Ingresos finales por periodo</p></div><select id="agrupacion"><option value="day">Diaria</option><option value="week">Semanal</option><option value="month">Mensual</option></select></div><div class="canvas-area"><canvas id="chartEvolucion"></canvas><div class="empty-chart" hidden></div></div></section>
+            <section class="analytic-card"><div class="analytic-heading"><div><h3>Ventas por categoría</h3><p>Selecciona una categoría para analizarla</p></div><select id="modoCategoria"><option value="importe">Ingresos</option><option value="unidades">Unidades</option></select></div><div class="canvas-area"><canvas id="chartCategorias"></canvas><div class="empty-chart" hidden></div></div></section>
+        </div>
+        <div class="analytic-grid equal-grid">
+            <section class="analytic-card"><div class="analytic-heading"><div><h3>Top 10 productos</h3><p>Selecciona una barra para filtrar</p></div></div><div class="canvas-area tall"><canvas id="chartTop"></canvas><div class="empty-chart" hidden></div></div></section>
+            <section class="analytic-card"><div class="analytic-heading"><div><h3>Productos de menor rotación</h3><p>Incluye productos activos sin ventas</p></div></div><div class="canvas-area tall"><canvas id="chartBajos"></canvas><div class="empty-chart" hidden></div></div></section>
+        </div>
+        <div class="analytic-grid equal-grid">
+            <section class="analytic-card"><div class="analytic-heading"><div><h3>Métodos de pago</h3><p>Distribución de ventas</p></div><select id="modoPago"><option value="transacciones">Transacciones</option><option value="importe">Importe</option><option value="porcentaje">Porcentaje</option></select></div><div class="canvas-area compact"><canvas id="chartPagosNuevo"></canvas><div class="empty-chart" hidden></div></div></section>
+            <section class="analytic-card"><div class="analytic-heading"><div><h3>Actividad por día</h3><p>Días de la semana</p></div><select id="modoDia"><option value="importe">Ingresos</option><option value="transacciones">Ventas</option></select></div><div class="canvas-area compact"><canvas id="chartDias"></canvas><div class="empty-chart" hidden></div></div></section>
+        </div>
+        <div class="analytic-grid equal-grid">
+            <section class="analytic-card"><div class="analytic-heading"><div><h3>Comparación mensual</h3><p>Ingresos y variación frente al mes anterior</p></div></div><div class="canvas-area compact"><canvas id="chartMeses"></canvas><div class="empty-chart" hidden></div></div></section>
+            <section class="analytic-card"><div class="analytic-heading"><div><h3>Inventario y rotación</h3><p>Stock actual de variantes activas</p></div></div><div id="inventarioAnalitica"></div></section>
+        </div>
+        <section class="analytic-card insight-section"><div class="analytic-heading"><div><h3>Oportunidades y alertas</h3><p>Observaciones calculadas con los datos disponibles</p></div></div><div id="insightsAnalitica" class="insight-grid"></div></section>
+    </div>
+</div>
