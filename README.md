@@ -67,3 +67,15 @@ No se incluyen credenciales, cadenas de conexión reales ni datos de producción
 
 Este proyecto demuestra la construcción de una solución comercial full-stack: modelado de datos, operaciones de venta, control de inventario, autorización administrativa, analítica de negocio y generación de reportes.
 
+
+## Organización del código y modelo de datos
+
+- `Proyecto_DAS/Controllers/`: acciones MVC para catálogo, carrito, ventas, inventario y administración.
+- `Models/` y `Data/AppDbContext.cs`: entidades y persistencia; el dominio incluye usuarios, clientes, productos y variantes, categorías, proveedores, ventas y detalles, cupones, envíos y alertas de stock.
+- `ViewModels/`, `Views/` y `wwwroot/`: datos de formularios, vistas Razor y recursos de interfaz.
+- `Services/`: carrito, dashboard, reportes Excel, boletas PDF y envío opcional de correo mediante MailKit.
+- `Filters/`: restricciones de acceso para administrador y cliente; `Migrations/`: evolución del esquema.
+
+La aplicación guarda identificador y rol en la sesión y los filtros comprueban esos valores. El controlador de acceso aplica SHA-256 directamente a las contraseñas: antes de un despliegue real debe sustituirse por un algoritmo de derivación de contraseñas con sal, como el proporcionado por ASP.NET Core Identity, y revisarse la protección de rutas y sesiones.
+
+Para ejecutar la migración mediante `dotnet ef`, instala o restaura previamente una versión compatible de la herramienta y revisa la cadena `ConnectionStrings:StringSQLServer`. El envío de boletas por correo depende de `EmailSettings` y puede permanecer deshabilitado. Las pruebas JavaScript del dashboard están en `Proyecto_DAS/tests/`.
